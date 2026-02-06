@@ -4,7 +4,23 @@ using System.Text;
 
 namespace LibrarySystem.Core.Models
 {
-    internal class Loan
+    public class Loan
     {
+        public Book Book { get; }
+        public Member Member { get; }
+
+        public DateTime LoanDate { get; }
+
+        public Loan(Book book, Member member, DateTime loanDate)
+        {
+            Book = book;
+            Member = member;
+            LoanDate = loanDate;
+        }
+
+        public bool IsOverdue ()
+        {
+            return (DateTime.Now - LoanDate).TotalDays > 14;
+        }
     }
 }
