@@ -4,7 +4,14 @@ using System.Text;
 
 namespace LibrarySystem.Core.Models
 {
-    internal class Member
+    public class Member
     {
+        public int Id { get; }
+        public string Name { get; }
+        public Member(int id, string name)
+        {
+            Id = id;
+            Name = name;
+        }
     }
 }
