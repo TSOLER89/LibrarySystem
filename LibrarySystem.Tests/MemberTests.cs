@@ -1,6 +1,6 @@
 ﻿namespace LibrarySystem.Tests;
 
-public class UnitTest1
+public class MemberTests
 {
     [Fact]
     public void Test1()

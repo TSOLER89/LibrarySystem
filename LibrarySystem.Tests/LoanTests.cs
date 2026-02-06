@@ -4,7 +4,7 @@ using System.Text;
 
 namespace LibrarySystem.Tests
 {
-    internal class BookTest
+    internal class LoanTests
     {
     }
 }
