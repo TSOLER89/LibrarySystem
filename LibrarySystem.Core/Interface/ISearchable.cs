@@ -1,6 +1,6 @@
 ﻿namespace LibrarySystem.Core.Interface;
 
-public class ISearchable
+public interface ISearchable
 {
-
+    bool Matches(string searchTerm);
 }
