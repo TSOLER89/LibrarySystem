@@ -9,13 +9,14 @@ namespace LibrarySystem.Tests
         public void Loan_Should_Be_Overdue_After_14_Days()
         {
             // Arrange
-            var book = new Book ("Test", "Author", "1")
-            var member = new Member("Alice", 1);
-            
-            var loan = new LoanTests (book, member, DateTime.Now.AddDays(-15));
+            var book = new Book("1", "Test", "Author", "2024");
+            var member = new Member(1, "Alice");
+
+            var loan = new Loan(book, member, DateTime.Now.AddDays(-15));
             //Assert
-            Assert.True(loan.IsOverdue);
+            Assert.True(loan.IsOverdue());
 
         }
     }
 }
+

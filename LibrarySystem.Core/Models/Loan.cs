@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 
 namespace LibrarySystem.Core.Models
 {
     public class Loan
+
     {
         public Book Book { get; }
         public Member Member { get; }
-
         public DateTime LoanDate { get; }
 
         public Loan(Book book, Member member, DateTime loanDate)
@@ -18,9 +16,9 @@ namespace LibrarySystem.Core.Models
             LoanDate = loanDate;
         }
 
-        public bool IsOverdue ()
+        public bool IsOverdue()
         {
-            return (DateTime.Now - LoanDate).TotalDays > 14;
+            return (DateTime.Now - LoanDate).Days > 14;
         }
     }
 }
