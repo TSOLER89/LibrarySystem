@@ -20,5 +20,14 @@ namespace LibrarySystem.Core.Services
         {
             return _books.Count;
         }
+
+        public Member MostActiveMember()
+        {
+            return _loans
+                .GroupBy(l => l.Member)
+                .OrderByDescending(g => g.Count())
+                .First()
+                .Key;
+        }
     }
 }
