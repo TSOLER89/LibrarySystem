@@ -1,5 +1,6 @@
 ﻿using Xunit;
 using LibrarySystem.Core.Services;
+using LibrarySystem.Core.Models;
 using System.Collections.Generic;
 
 
@@ -14,8 +15,9 @@ namespace LibrarySystem.Tests
             // Arrange
             var books = new List<Book>
             {
-                new Book("A", "A", "1"),
-                new Book("B", "B", "2"),
+
+                new Book("1", "A", "A", "2024"),
+                new Book("2", "B", "B", "2024"),
             };
             var library = new Library(books, new List<Loan>());
 
