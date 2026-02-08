@@ -14,10 +14,17 @@ namespace LibrarySystem.Core.Services
             _books = books;
         }
 
-        public List<Book>SearchByTitle(string title)
+        public List<Book> SearchByTitle(string title)
         {
             return _books
                 .Where(b => b.Title.Contains(title))
+                .ToList();
+        }
+
+        public List<Book> SortByTitle()
+        {
+            return _books
+                .OrderBy(b => b.Title)
                 .ToList();
         }
     }
