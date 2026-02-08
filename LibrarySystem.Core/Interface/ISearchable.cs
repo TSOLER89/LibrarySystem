@@ -1,4 +1,8 @@
-﻿namespace LibrarySystem.Core.Interface;
+﻿using System;
+using System.Collections.Generic;
+
+namespace LibrarySystem.Core.Interface;
+
 
 public interface ISearchable
 {

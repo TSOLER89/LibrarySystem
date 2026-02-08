@@ -1,4 +1,6 @@
 ﻿using LibrarySystem.Core.Interface;
+using System;
+using System.Collections.Generic;
 
 namespace LibrarySystem.Core.Models
 {
@@ -29,20 +31,16 @@ namespace LibrarySystem.Core.Models
 
         public bool Matches(string searchTerm)
         {
-            if (string.IsNullOrEmpty(searchTerm))
-                return false;
-
             searchTerm = searchTerm.ToLower();
-            return Title.ToLower().Contains(searchTerm) 
-                || Author.ToLower().Contains(searchTerm) 
-                || PublishedYear.ToLower().Contains(searchTerm)
+
+            return Title.ToLower().Contains(searchTerm)
+                || Author.ToLower().Contains(searchTerm)
                 || ISBN.ToLower().Contains(searchTerm);
         }
 
         public void MarkAsBorrowed() => IsAvailable = false;
         public void MarkAsReturned() => IsAvailable = true;
-
-
     }
 }
+
 
