@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace LibrarySystem.Core.Models
 {
+    // Represents a member of the library
     public class Member
     {
         public int Id { get; }

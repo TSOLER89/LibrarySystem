@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace LibrarySystem.Core.Services
 {
+    // Service for managing the book catalog
     public class BookCatalog
     {
         private readonly List<Book> _books;
@@ -14,6 +15,8 @@ namespace LibrarySystem.Core.Services
             _books = books;
         }
 
+
+        // Search for books by title
         public List<Book> SearchByTitle(string title)
         {
             return _books
@@ -21,6 +24,7 @@ namespace LibrarySystem.Core.Services
                 .ToList();
         }
 
+        // Search for books by author
         public List<Book> SortByTitle()
         {
             return _books

@@ -9,9 +9,10 @@ namespace LibrarySystem.Tests
     public class LibraryBorrowedBooksTests
     {
         [Fact]
+        // Test method to verify the number of borrowed books
         public void Should_Return_Number_Of_Borrowed_Books()
         {
-
+            // Arrange
             var book1 = new Book("1", "Book1", "Author", "2024");
             var book2 = new Book("2", "Book2", "Author", "2024");
 
@@ -24,6 +25,7 @@ namespace LibrarySystem.Tests
 
             var library = new Library(books, loans);
 
+            // Act
             Assert.Equal(1, library.BorrowedBooksCount());        }
     }
 }

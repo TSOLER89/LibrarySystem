@@ -8,6 +8,7 @@ namespace LibrarySystem.Tests;
 public class SearchNoResultsTests
 {
     [Fact]
+    // Test to verify that searching for a book title that does not exist in the catalog returns an empty list
     public void Search_Should_Return_Empty_List_When_No_Match_Found()
     {
         // Arrange
