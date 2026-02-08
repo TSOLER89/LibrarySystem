@@ -29,5 +29,10 @@ namespace LibrarySystem.Core.Services
                 .First()
                 .Key;
         }
+
+        public int BorrowedBooksCount()
+        {
+            return _loans.Count;
+        }
     }
 }

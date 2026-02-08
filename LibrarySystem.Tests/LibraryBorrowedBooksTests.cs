@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using LibrarySystem.Core.Services;
+using LibrarySystem.Core.Models;
 
 namespace LibrarySystem.Tests
 {
@@ -10,8 +11,9 @@ namespace LibrarySystem.Tests
         [Fact]
         public void Should_Return_Number_Of_Borrowed_Books()
         {
-            var book1 = new Book("Book1", "Author", "1");
-            var book2 = new Book("Book2", "Author", "2");
+
+            var book1 = new Book("1", "Book1", "Author", "2024");
+            var book2 = new Book("2", "Book2", "Author", "2024");
 
             var member = new Member(1, "Alice");
 
