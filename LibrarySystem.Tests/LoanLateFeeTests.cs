@@ -2,25 +2,26 @@
 using LibrarySystem.Core.Models;
 using System;
 
-namespace LibrarySystem.Tests;
-
-public class LoanLateFeeTests
+namespace LibrarySystem.Tests
 {
-    [Fact]
-
-    // Test to verify that the CalculateLateFee method returns the correct fee when a loan is overdue
-    public void CalculateLateFee_Should_Return_Fee_When_Loan_Is_Overdue()
+    public class LoanLateFeeTests
     {
-        // Arrange
-        var book = new Book("1", "1984", "George Orwell", "1949");
-        var member = new Member(1, "Alice");
+        [Fact]
+        public void Should_Calculate_Late_Fee_Correctly()
+        {
+            // Arrange
+            var book = new Book("1", "Test Book", "Test Author", 2024);
+            var member = new Member(1, "Alice", "alice@test.com", DateTime.Now);
 
-        // Simulate a loan that was made 20 days ago, which is 6 days overdue (assuming a 14-day loan period)
-        var loanDate = DateTime.Today.AddDays(-20); // 6 dagar för sent
-        var loan = new Loan(book, member, loanDate);
+            // Skapa ett lån som är 5 dagar försenat
+            var loanDate = DateTime.Now.AddDays(-19); // 14 + 5 dagar
+            var loan = new Loan(book, member, loanDate);
 
-        var fee = loan.CalculateLateFee(DateTime.Today);
+            // Act
+            var fee = loan.CalculateLateFee(DateTime.Now);
 
-        Assert.Equal(30, fee); // 6 * 5 kr
+            // Assert
+            Assert.Equal(25, fee); // 5 dagar * $5 = $25
+        }
     }
 }
