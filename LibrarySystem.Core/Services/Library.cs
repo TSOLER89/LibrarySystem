@@ -1,45 +1,117 @@
 ﻿using LibrarySystem.Core.Models;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
+using System.Text;
 
 namespace LibrarySystem.Core.Services
 {
-
-    /// Represents a library that manages books and loans.
     public class Library
     {
-        private readonly List<Book> _books;
-        private readonly List<Loan> _loans;
+        private readonly BookCatalog _bookCatalog;
+        private readonly MemberRegistry _memberRegistry;
+        private readonly LoanManager _loanManager;
 
-        public Library(List<Book> books, List<Loan> loans)
+        // Konstruktor som tar emot de tre service-klasserna (komposition)
+        public Library(BookCatalog bookCatalog, MemberRegistry memberRegistry, LoanManager loanManager)
         {
-            _books = books;
-            _loans = loans;
+            _bookCatalog = bookCatalog ?? throw new ArgumentNullException(nameof(bookCatalog));
+            _memberRegistry = memberRegistry ?? throw new ArgumentNullException(nameof(memberRegistry));
+            _loanManager = loanManager ?? throw new ArgumentNullException(nameof(loanManager));
         }
 
-        /// Returns the total number of books in the library.
-        
+        // --- Book-relaterade metoder ---
         public int TotalBooks()
         {
-            return _books.Count;
+            return _bookCatalog.GetAllBooks().Count;
         }
 
-
-        /// Returns the most active member based on the number of loans.
-        public Member MostActiveMember()
+        public List<Book> SearchBooksByTitle(string title)
         {
-            return _loans
-                .GroupBy(l => l.Member)
-                .OrderByDescending(g => g.Count())
-                .First()
-                .Key;
+            return _bookCatalog.SearchByTitle(title);
+        }
+
+        public List<Book> GetAllBooksSorted()
+        {
+            return _bookCatalog.SortByTitle();
+        }
+
+        // --- Member-relaterade metoder ---
+        public void AddMember(Member member)
+        {
+            _memberRegistry.AddMember(member);
+        }
+
+        public Member FindMember(int memberId)
+        {
+            return _memberRegistry.FindMemberById(memberId);
+        }
+
+        public List<Member> GetMembersWithOverdueBooks()
+        {
+            return _memberRegistry.GetMembersWithOverdueBooks();
+        }
+
+        // --- Loan-relaterade metoder ---
+        public Loan BorrowBook(string isbn, int memberId)
+        {
+            var book = _bookCatalog.FindBookByISBN(isbn);
+            var member = _memberRegistry.FindMemberById(memberId);
+
+            return _loanManager.CreateLoan(book, member);
+        }
+
+        public void ReturnBook(Loan loan)
+        {
+            _loanManager.ReturnBook(loan);
         }
 
         public int BorrowedBooksCount()
         {
-            return _loans.Count;
+            return _loanManager.GetActiveLoans().Count;
+        }
+
+        public List<Loan> GetOverdueLoans()
+        {
+            return _loanManager.GetOverdueLoans();
+        }
+
+        public int CalculateTotalLateFees()
+        {
+            return _loanManager.CalculateTotalLateFees();
+        }
+
+        // --- Statistik-metoder ---
+        public Member MostActiveMember()
+        {
+            var allMembers = _memberRegistry.GetAllMembers();
+
+            if (!allMembers.Any())
+                throw new InvalidOperationException("No members in the system");
+
+            return allMembers
+                .OrderByDescending(m => m.BorrowedBooks.Count)
+                .First();
+        }
+
+        public string GetLibraryStatistics()
+        {
+            var totalBooks = TotalBooks();
+            var borrowedBooks = BorrowedBooksCount();
+            var availableBooks = totalBooks - borrowedBooks;
+            var overdueLoans = GetOverdueLoans().Count;
+            var totalLateFees = CalculateTotalLateFees();
+            var totalMembers = _memberRegistry.GetAllMembers().Count;
+
+            return $@"
+=== Library Statistics ===
+Total Books: {totalBooks}
+Available Books: {availableBooks}
+Borrowed Books: {borrowedBooks}
+Overdue Loans: {overdueLoans}
+Total Late Fees: ${totalLateFees}
+Total Members: {totalMembers}
+========================";
         }
     }
 }
