@@ -14,7 +14,7 @@ namespace LibrarySystem.Core.Models
         public DateTime MemberSince { get; }
         public List <Loan> BorrowedBooks { get; }
 
-        publuc Member(int id, string name, string email, DateTime memberSince)
+        public Member(int id, string name, string email, DateTime memberSince)
         {
             Id = id;
             Name = name;

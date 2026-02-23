@@ -29,7 +29,7 @@ namespace LibrarySystem.Core.Models
         // A loan is considered overdue if it's been more than 14 days since the loan date
         public bool IsOverdue()
         {
-            if (IsRetuned)
+            if (IsReturned)
                 return false;
             return DateTime.Now > DueDate;
         }
