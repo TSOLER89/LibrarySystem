@@ -1,139 +1,136 @@
-﻿using LibrarySystem.Core.Models;
+﻿using LibrarySystem.Core;
+using LibrarySystem.Core.Models;
 using LibrarySystem.Core.Services;
+using LibrarySystem.Core.Interface;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace LibrarySystem;
-
-public class Program
+try
 {
-    public static void Main(string[] args)
+    Console.WriteLine("=== Welcome to Library System ===\n");
+
+    // Skapa böcker
+    var books = new List<Book>
     {
-        var books = new List<Book>
+        new Book("978-0451524935", "1984", "George Orwell", 1949),
+        new Book("978-0547928227", "The Hobbit", "J.R.R. Tolkien", 1937),
+        new Book("978-0060850524", "Brave New World", "Aldous Huxley", 1932)
+    };
+
+    // Skapa medlemmar
+    var members = new List<Member>
+    {
+        new Member(1, "Alice Johnson", "alice@example.com", DateTime.Now.AddYears(-2)),
+        new Member(2, "Bob Smith", "bob@example.com", DateTime.Now.AddYears(-1)),
+        new Member(3, "Carol Williams", "carol@example.com", DateTime.Now.AddMonths(-6))
+    };
+
+    // Skapa service-objekt
+    var bookCatalog = new BookCatalog(books);
+    var memberRegistry = new MemberRegistry(members);
+    var loanManager = new LoanManager();
+
+    // Skapa biblioteket med komposition
+    var library = new Library(bookCatalog, memberRegistry, loanManager);
+
+    // Visa initial statistik
+    Console.WriteLine(library.GetLibraryStatistics());
+
+    // --- Simulera låneaktiviteter ---
+    Console.WriteLine("\n=== Borrowing Books ===");
+
+    // Alice lånar 1984
+    try
+    {
+        var loan1 = library.BorrowBook("978-0451524935", 1);
+        Console.WriteLine($"✓ Alice borrowed '1984' (Due: {loan1.DueDate:yyyy-MM-dd})");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"✗ Error: {ex.Message}");
+    }
+
+    // Bob lånar The Hobbit
+    try
+    {
+        var loan2 = library.BorrowBook("978-0547928227", 2);
+        Console.WriteLine($"✓ Bob borrowed 'The Hobbit' (Due: {loan2.DueDate:yyyy-MM-dd})");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"✗ Error: {ex.Message}");
+    }
+
+    // Försök låna samma bok igen (ska misslyckas)
+    try
+    {
+        var loan3 = library.BorrowBook("978-0451524935", 3);
+        Console.WriteLine($"✓ Carol borrowed '1984'");
+    }
+    catch (InvalidOperationException ex)
+    {
+        Console.WriteLine($"✗ Expected error: {ex.Message}");
+    }
+
+    // Visa uppdaterad statistik
+    Console.WriteLine(library.GetLibraryStatistics());
+
+    // --- Sök efter böcker ---
+    Console.WriteLine("\n=== Searching for Books ===");
+    var searchResults = library.SearchBooksByTitle("Hobbit");
+    Console.WriteLine($"Found {searchResults.Count} book(s) matching 'Hobbit':");
+    foreach (var book in searchResults)
+    {
+        Console.WriteLine($"  - {book.Title} by {book.Author}");
+    }
+
+    // --- Visa medlemmar med försenade böcker ---
+    Console.WriteLine("\n=== Checking Overdue Books ===");
+    var overdueLoans = library.GetOverdueLoans();
+    if (overdueLoans.Any())
+    {
+        Console.WriteLine($"Found {overdueLoans.Count} overdue loan(s):");
+        foreach (var loan in overdueLoans)
         {
-            new Book("978-91-0-012345-6", "Sagan om ringen", "J.R.R. Tolkien", "1954"),
-            new Book("978-91-0-987654-3", "Hobbiten", "J.R.R. Tolkien", "1937")
-        };
-
-        var members = new List<Member>
-        {
-            new Member(1, "Anna Andersson"),
-            new Member(2, "Erik Svensson")
-        };
-
-        var loans = new List<Loan>();
-        var library = new Library(books, loans);
-        var catalog = new BookCatalog(books);
-
-        bool running = true;
-
-        while (running)
-        {
-            Console.WriteLine("\n=== Bibliotekssystem ===");
-            Console.WriteLine("1. Visa alla böcker");
-            Console.WriteLine("2. Sök bok");
-            Console.WriteLine("3. Låna bok");
-            Console.WriteLine("4. Returnera bok");
-            Console.WriteLine("5. Visa medlemmar");
-            Console.WriteLine("6. Statistik");
-            Console.WriteLine("0. Avsluta");
-            Console.Write("\nVälj: ");
-
-            var choice = Console.ReadLine();
-
-            switch (choice)
-            {
-                case "1":
-                    foreach (var book in books)
-                    {
-                        Console.WriteLine(
-                            $"\"{book.Title}\" av {book.Author} ({book.PublishedYear}) - {GetBookStatus(book, loans)}");
-                    }
-                    break;
-
-                case "2":
-                    Console.Write("\nSökterm: ");
-                    var term = Console.ReadLine();
-
-                    var results = catalog.SearchByTitle(term);
-
-                    Console.WriteLine("\nSökresultat:");
-                    int index = 1;
-                    foreach (var book in results)
-                    {
-                        Console.WriteLine(
-                            $"{index++}. \"{book.Title}\" av {book.Author} ({book.PublishedYear}) - {GetBookStatus(book, loans)}");
-                    }
-                    break;
-
-                case "3":
-                    Console.Write("\nAnge ISBN: ");
-                    var isbn = Console.ReadLine();
-
-                    Console.Write("Ange medlems-ID: ");
-                    int memberId = int.Parse(Console.ReadLine());
-
-                    var bookToLoan = books.FirstOrDefault(b => b.ISBN == isbn);
-                    var member = members.FirstOrDefault(m => m.Id == memberId);
-
-                    if (bookToLoan == null || member == null)
-                    {
-                        Console.WriteLine("Felaktigt ISBN eller medlems-ID.");
-                        break;
-                    }
-
-                    loans.Add(new Loan(bookToLoan, member, DateTime.Now));
-
-                    Console.WriteLine(
-                        $"Boken \"{bookToLoan.Title}\" har lånats ut till {member.Name}.");
-                    Console.WriteLine(
-                        $"Återlämningsdatum: {DateTime.Now.AddDays(14):yyyy-MM-dd}");
-                    break;
-
-                case "4":
-                    Console.Write("\nAnge ISBN: ");
-                    var returnIsbn = Console.ReadLine();
-
-                    var loan = loans.FirstOrDefault(l => l.Book.ISBN == returnIsbn);
-
-                    if (loan == null)
-                    {
-                        Console.WriteLine("Boken är inte utlånad.");
-                        break;
-                    }
-
-                    loans.Remove(loan);
-                    Console.WriteLine($"Boken \"{loan.Book.Title}\" har returnerats.");
-                    break;
-
-                case "5":
-                    foreach (var m in members)
-                    {
-                        Console.WriteLine($"{m.Id}: {m.Name}");
-                    }
-                    break;
-
-                case "6":
-                    Console.WriteLine($"Totalt antal böcker: {library.TotalBooks()}");
-                    Console.WriteLine($"Utlånade böcker: {library.BorrowedBooksCount()}");
-                    break;
-
-                case "0":
-                    running = false;
-                    break;
-
-                default:
-                    Console.WriteLine("Ogiltigt val.");
-                    break;
-            }
+            var fee = loan.CalculateLateFee(DateTime.Now);
+            Console.WriteLine($"  - {loan.Member.Name} has '{loan.Book.Title}' overdue. Fee: ${fee}");
         }
     }
-
-    static string GetBookStatus(Book book, List<Loan> loans)
+    else
     {
-        return loans.Any(l => l.Book.ISBN == book.ISBN)
-            ? "Utlånad"
-            : "Tillgänglig";
+        Console.WriteLine("No overdue loans at this time.");
     }
+
+    // --- Returnera en bok ---
+    Console.WriteLine("\n=== Returning Books ===");
+    try
+    {
+        var aliceLoans = library.FindMember(1).GetActiveLoans();
+        if (aliceLoans.Any())
+        {
+            library.ReturnBook(aliceLoans.First());
+            Console.WriteLine("✓ Alice returned '1984'");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"✗ Error: {ex.Message}");
+    }
+
+    // Slutlig statistik
+    Console.WriteLine(library.GetLibraryStatistics());
+
+    Console.WriteLine("\n=== Program completed successfully ===");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"\n!!! FATAL ERROR !!!");
+    Console.WriteLine($"Type: {ex.GetType().Name}");
+    Console.WriteLine($"Message: {ex.Message}");
+    Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+}
+finally
+{
+    Console.WriteLine("\nPress any key to exit...");
+    Console.ReadKey();
 }
