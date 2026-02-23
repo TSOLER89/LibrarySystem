@@ -12,13 +12,13 @@ namespace LibrarySystem.Core.Models
         public string Title { get; private set; }
 
         public string Author { get; private set; }
-        public string PublishedYear { get; private set; }
+        public int PublishedYear { get; private set; }
 
         public bool IsAvailable { get; private set; }
 
 
         // Constructor to initialize a new book
-        public Book(string isbn, string title, string author, string publishedYear)
+        public Book(string isbn, string title, string author, int publishedYear)
         {
             ISBN = isbn;
             Title = title;
