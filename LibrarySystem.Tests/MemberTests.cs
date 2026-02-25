@@ -29,7 +29,7 @@ namespace LibrarySystem.Tests
 
             // Assert
             Assert.Single(member.BorrowedBooks);
-            Assert.Equal(loan, member.BorrowedBooks[0]);
+            Assert.Equal(book, member.BorrowedBooks[0]);
         }
 
         [Fact]

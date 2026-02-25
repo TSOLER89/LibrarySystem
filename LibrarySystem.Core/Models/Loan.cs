@@ -30,10 +30,15 @@ namespace LibrarySystem.Core.Models
             LoanDate = loanDate;
             DueDate = loanDate.AddDays(14);
         }
-
-        public void MarkAsReturned(DateTime returnDate) => ReturnDate = returnDate;
+        
+        public bool IsOverdue() => IsOverdue(DateTime.Today);
 
         public bool IsOverdue(DateTime today) => !IsReturned && today > DueDate;
+
+        public void MarkAsReturned(DateTime returnDate)
+        {
+            ReturnDate = returnDate;
+        }
 
         public int CalculateLateFee(DateTime today)
         {

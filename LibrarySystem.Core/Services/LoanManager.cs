@@ -50,7 +50,7 @@ namespace LibrarySystem.Core.Services
             if (loan.IsReturned)
                 throw new InvalidOperationException("This book has already been returned");
 
-            loan.MarkAsReturned(DateTime.Now);
+            loan.MarkAsReturned( DateTime.Now);
             loan.Book.MarkAsReturned();
         }
 

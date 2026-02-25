@@ -27,10 +27,9 @@ namespace LibrarySystem.Core.Models
             MemberSince = memberSince;
         }
 
-        // Hjälpmetod (din nya modell: aktiva lån = lån utan ReturnDate)
+        // Aktiva lån = lån utan ReturnDate
         public List<Loan> GetActiveLoans()
             => Loans.Where(l => !l.IsReturned).ToList();
-
 
         // Del 1-kod kan ha anropat Member.AddLoan(...)
         public void AddLoan(Loan loan)
@@ -45,8 +44,33 @@ namespace LibrarySystem.Core.Models
                 .Select(l => l.Book)
                 .ToList();
 
-        // Del 1-kod kan ha använt Member.HasOverdueBooks()
+        // Ny "riktiga" metod (bra för tester där du vill styra datum)
         public bool HasOverdueBooks(DateTime today) =>
             Loans.Any(l => l.IsOverdue(today));
+
+        // -----------------------------
+        // Kompatibilitet med Del 1/tester
+        // -----------------------------
+
+        // Program.cs (Del 1) verkar använda member.GetInfo()
+        public string GetInfo()
+        {
+            return $"{Id}: {Name} ({Email}) - Medlem sedan {MemberSince:yyyy-MM-dd}";
+        }
+
+        // Om gammal kod/tester anropar HasOverdueBooks() utan parameter
+        public bool HasOverdueBooks() => HasOverdueBooks(DateTime.Today);
+
+        // Om ett test anropar HasOverdueBooks(loan, book) (som din felbild antyder)
+        public bool HasOverdueBooks(Loan loan, Book book)
+        {
+            if (loan == null || book == null) return false;
+            if (loan.Book == null) return false;
+
+            // Kolla att lånet gäller den boken
+            if (loan.Book.ISBN != book.ISBN) return false;
+
+            return loan.IsOverdue(DateTime.Today);
+        }
     }
 }
