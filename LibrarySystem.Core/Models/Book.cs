@@ -1,42 +1,47 @@
 ﻿using LibrarySystem.Core.Interface;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LibrarySystem.Core.Models
 {
-    // Represents a book in the library system
     public class Book : ISearchable
     {
-        public string ISBN { get; set; }
-        public string Title { get; private set; }
+        // Primary key for EF Core
+        public int Id { get; set; }
 
-        public string Author { get; private set; }
-        public int PublishedYear { get; private set; }
+        public string ISBN { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Author { get; set; } = string.Empty;
+        public int PublishedYear { get; set; }
 
-        public bool IsAvailable { get; private set; }
+        public bool IsAvailable { get; set; } = true;
+
+        // Navigation property (for EF Core relation)
+        public ICollection<Loan> Loans { get; set; } = new List<Loan>();
 
 
-        // Constructor to initialize a new book
+        // Empty constructor required by EF Core
+        public Book() { }
+
+        // original constructor 
         public Book(string isbn, string title, string author, int publishedYear)
         {
             ISBN = isbn;
             Title = title;
             Author = author;
             PublishedYear = publishedYear;
-            IsAvailable = true; // New books are available by default
+            IsAvailable = true;
         }
 
-
-        // Returns a string with the book's information
+        // Method to get a formatted string with the book's information.
         public string GetInfo()
         {
             var status = IsAvailable ? "Tillgänglig" : "Utlånad";
-            return $" {Title} av {Author} ({PublishedYear}) - {status}";
+            return $"{Title} av {Author} ({PublishedYear}) - {status}";
         }
 
 
-        // Checks if the book matches a search term (by title, author, or ISBN)
+        // Implementing the ISearchable interface method to
+        // check if the search term matches any of the book's properties.
         public bool Matches(string searchTerm)
         {
             searchTerm = searchTerm.ToLower();
@@ -46,10 +51,7 @@ namespace LibrarySystem.Core.Models
                 || ISBN.ToLower().Contains(searchTerm);
         }
 
-        // Marks the book as borrowed (not available)
         public void MarkAsBorrowed() => IsAvailable = false;
         public void MarkAsReturned() => IsAvailable = true;
     }
 }
-
-

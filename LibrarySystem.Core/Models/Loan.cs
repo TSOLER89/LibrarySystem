@@ -6,52 +6,42 @@ using System.Linq;
 namespace LibrarySystem.Core.Models
 {
     public class Loan
-
     {
-        public Book Book { get; }
-        public Member Member { get; }
-        public DateTime LoanDate { get; }
-        public DateTime DueDate { get; }
-        public DateTime? ReturnDate { get; private set; }
+        public int Id { get; set; }
+
+        // Foreign keys
+        public int BookId { get; set; }
+        public Book Book { get; set; } = default!;
+
+        public int MemberId { get; set; }
+        public Member Member { get; set; } = default!;
+
+        public DateTime LoanDate { get; set; }
+        public DateTime DueDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
         public bool IsReturned => ReturnDate.HasValue;
 
+        public Loan() { } // EF
 
-        // Constructor to initialize a loan with a book, member, and loan date
         public Loan(Book book, Member member, DateTime loanDate)
         {
             Book = book;
             Member = member;
             LoanDate = loanDate;
-            DueDate = loanDate.AddDays(14); // Set due date to 14 days after loan date
-            ReturnDate = null;
+            DueDate = loanDate.AddDays(14);
         }
 
-        // A loan is considered overdue if it's been more than 14 days since the loan date
-        public bool IsOverdue()
-        {
-            if (IsReturned)
-                return false;
-            return DateTime.Now > DueDate;
-        }
+        public void MarkAsReturned(DateTime returnDate) => ReturnDate = returnDate;
 
-        // Simple late fee calculation: $5 per day after 14 days
+        public bool IsOverdue(DateTime today)
+            => !IsReturned && today > DueDate;
+
         public int CalculateLateFee(DateTime today)
         {
-            // Define the loan period and fee per day
             const int feePerDay = 5;
-
-            // Calculate the number of overdue days
-            var checkDate = IsReturned ? ReturnDate.Value : today;
+            var checkDate = IsReturned ? ReturnDate!.Value : today;
             var overdueDays = (checkDate - DueDate).Days;
-
-            // If there are overdue days, calculate the fee; otherwise, return 0
             return overdueDays > 0 ? overdueDays * feePerDay : 0;
-        }
-
-        // Method to mark the loan as returned
-        public void MarkAsReturned(DateTime returnDate)
-        {
-            ReturnDate = returnDate;
         }
     }
 }
