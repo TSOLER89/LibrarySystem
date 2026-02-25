@@ -1,5 +1,6 @@
-using LibrarySystem.Web.Components;
 using LibrarySystem.Data;
+using LibrarySystem.Data.Repository;
+using LibrarySystem.Web.Components;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -13,6 +14,9 @@ builder.Services.AddRazorComponents()
 builder.Services.AddDbContext<LibraryContext>(options =>
     options.UseSqlite("Data Source=library.db"));
 
+//AddScoped betyder: samma repository används under en web-request/session.
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+
 var app = builder.Build();
 
 //service provider
@@ -21,6 +25,8 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<LibraryContext>();
     db.Database.Migrate();
 }
+
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
