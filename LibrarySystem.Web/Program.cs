@@ -11,9 +11,16 @@ builder.Services.AddRazorComponents()
 
 // Configure the database context to use SQLite with the connection string from the configuration.
 builder.Services.AddDbContext<LibraryContext>(options =>
-    options.UseSqlite("LibraryDb"));
+    options.UseSqlite("Data Source=library.db"));
 
 var app = builder.Build();
+
+//service provider
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<LibraryContext>();
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
