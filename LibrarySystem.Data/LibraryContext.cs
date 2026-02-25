@@ -22,12 +22,23 @@ public class LibraryContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Book>()
-            .HasIndex(b => b.ISBN)
+    .HasIndex(b => b.ISBN)
+    .IsUnique();
+
+        modelBuilder.Entity<Member>()
+            .HasIndex(m => m.Email)
             .IsUnique();
 
         modelBuilder.Entity<Loan>()
             .HasOne(l => l.Book)
             .WithMany(b => b.Loans)
-            .HasForeignKey(l => l.BookId);
+            .HasForeignKey(l => l.BookId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Loan>()
+            .HasOne(l => l.Member)
+            .WithMany(m => m.Loans)
+            .HasForeignKey(l => l.MemberId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
