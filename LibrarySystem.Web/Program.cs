@@ -11,7 +11,7 @@ builder.Services.AddRazorComponents()
 
 // Configure the database context to use SQLite with the connection string from the configuration.
 builder.Services.AddDbContext<LibraryContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("LibraryDb")));
+    options.UseSqlite("LibraryDb"));
 
 var app = builder.Build();
 
