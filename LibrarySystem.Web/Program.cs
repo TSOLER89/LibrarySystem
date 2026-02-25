@@ -1,10 +1,17 @@
 using LibrarySystem.Web.Components;
+using LibrarySystem.Data;
+using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+  .AddInteractiveServerComponents();
+
+// Configure the database context to use SQLite with the connection string from the configuration.
+builder.Services.AddDbContext<LibraryContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("LibraryDb")));
 
 var app = builder.Build();
 
