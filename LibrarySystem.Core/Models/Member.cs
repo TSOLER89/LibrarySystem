@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 
 namespace LibrarySystem.Core.Models
@@ -13,7 +12,7 @@ namespace LibrarySystem.Core.Models
         public string Email { get; set; } = "";
         public DateTime MemberSince { get; set; }
 
-        // Navigation
+        // Navigation (1 medlem -> många lån)
         public ICollection<Loan> Loans { get; set; } = new List<Loan>();
 
         // EF behöver parameterlös ctor
@@ -28,7 +27,26 @@ namespace LibrarySystem.Core.Models
             MemberSince = memberSince;
         }
 
-        // Hjälpmetoder kan du behålla, men basera på Loans
-        public List<Loan> GetActiveLoans() => Loans.Where(l => !l.IsReturned).ToList();
+        // Hjälpmetod (din nya modell: aktiva lån = lån utan ReturnDate)
+        public List<Loan> GetActiveLoans()
+            => Loans.Where(l => !l.IsReturned).ToList();
+
+
+        // Del 1-kod kan ha anropat Member.AddLoan(...)
+        public void AddLoan(Loan loan)
+        {
+            Loans.Add(loan);
+        }
+
+        // Del 1-kod kan ha använt Member.BorrowedBooks
+        public IReadOnlyList<Book> BorrowedBooks =>
+            Loans
+                .Where(l => !l.IsReturned)
+                .Select(l => l.Book)
+                .ToList();
+
+        // Del 1-kod kan ha använt Member.HasOverdueBooks()
+        public bool HasOverdueBooks(DateTime today) =>
+            Loans.Any(l => l.IsOverdue(today));
     }
 }

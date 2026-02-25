@@ -1,7 +1,4 @@
-﻿using System.Text;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 
 namespace LibrarySystem.Core.Models
 {
@@ -19,6 +16,7 @@ namespace LibrarySystem.Core.Models
         public DateTime LoanDate { get; set; }
         public DateTime DueDate { get; set; }
         public DateTime? ReturnDate { get; set; }
+
         public bool IsReturned => ReturnDate.HasValue;
 
         public Loan() { } // EF
@@ -26,15 +24,16 @@ namespace LibrarySystem.Core.Models
         public Loan(Book book, Member member, DateTime loanDate)
         {
             Book = book;
+            BookId = book.Id;       // (valfritt men bra)
             Member = member;
+            MemberId = member.Id;   // (valfritt men bra)
             LoanDate = loanDate;
             DueDate = loanDate.AddDays(14);
         }
 
         public void MarkAsReturned(DateTime returnDate) => ReturnDate = returnDate;
 
-        public bool IsOverdue(DateTime today)
-            => !IsReturned && today > DueDate;
+        public bool IsOverdue(DateTime today) => !IsReturned && today > DueDate;
 
         public int CalculateLateFee(DateTime today)
         {

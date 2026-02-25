@@ -32,7 +32,9 @@ namespace LibrarySystem.Core.Services
                 throw new InvalidOperationException($"Book '{book.Title}' is not available for loan");
 
             var loan = new Loan(book, member, DateTime.Now);
+
             _loans.Add(loan);
+
             book.MarkAsBorrowed();
             member.AddLoan(loan);
 
@@ -61,7 +63,8 @@ namespace LibrarySystem.Core.Services
         // Få alla försenade lån
         public List<Loan> GetOverdueLoans()
         {
-            return _loans.Where(l => l.IsOverdue()).ToList();
+            // ✅ FIX: IsOverdue kräver DateTime today
+            return _loans.Where(l => l.IsOverdue(DateTime.Today)).ToList();
         }
 
         // Få alla lån för en specifik medlem
