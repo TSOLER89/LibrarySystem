@@ -1,73 +1,83 @@
 ﻿@page "/books/new"
 @using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
 @using LibrarySystem.Core.Models
-@inject LibrarySystem.Web.Services.BookService Books
+@inject LibrarySystem.Web.Services.BookService BookService
 @inject NavigationManager Nav
 
 <h3>➕ Lägg till ny bok</h3>
 
-<EditForm Model="model" OnValidSubmit="HandleSubmit" FormName="NewBookForm">
+<EditForm EditContext="_editContext" OnSubmit="HandleSubmit" FormName="NewBookForm" method="post">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <div>
+    <div class="mb-3">
         <label>ISBN</label><br />
-        <InputText @bind-Value="model.ISBN" />
+        <InputText class="form-control" @bind-Value="model.ISBN" />
         <ValidationMessage For="@(() => model.ISBN)" />
     </div>
 
-    <div>
+    <div class="mb-3">
         <label>Titel</label><br />
-        <InputText @bind-Value="model.Title" />
+        <InputText class="form-control" @bind-Value="model.Title" />
         <ValidationMessage For="@(() => model.Title)" />
     </div>
 
-    <div>
+    <div class="mb-3">
         <label>Författare</label><br />
-        <InputText @bind-Value="model.Author" />
+        <InputText class="form-control" @bind-Value="model.Author" />
         <ValidationMessage For="@(() => model.Author)" />
     </div>
 
-    <div>
+    <div class="mb-3">
         <label>Publiceringsår</label><br />
-        <InputNumber @bind-Value="model.PublishedYear" />
+        <InputNumber class="form-control" @bind-Value="model.PublishedYear" />
         <ValidationMessage For="@(() => model.PublishedYear)" />
     </div>
 
-    <button type="submit">Spara</button>
-    <a href="/books" style="margin-left: 12px;">Avbryt</a>
+    <button class="btn btn-primary" type="submit">Spara</button>
+    <a class="btn btn-link" href="/books">Avbryt</a>
 </EditForm>
 
 @code {
     private NewBookModel model = new();
+    private EditContext _editContext = default!;
+
+    protected override void OnInitialized()
+    {
+        _editContext = new EditContext(model);
+    }
 
     private async Task HandleSubmit()
     {
+        if (!_editContext.Validate())
+            return;
+
         var book = new Book
         {
-            ISBN = model.ISBN,
-            Title = model.Title,
-            Author = model.Author,
+            ISBN = model.ISBN.Trim(),
+            Title = model.Title.Trim(),
+            Author = model.Author.Trim(),
             PublishedYear = model.PublishedYear,
             IsAvailable = true
         };
 
-        await Books.AddAsync(book);
+        await BookService.AddAsync(book);
         Nav.NavigateTo("/books");
     }
 
     private class NewBookModel
     {
-        [Required, StringLength(50)]
+        [Required(ErrorMessage = "ISBN måste fyllas i")]
         public string ISBN { get; set; } = "";
 
-        [Required, StringLength(200)]
+        [Required(ErrorMessage = "Titel måste fyllas i")]
         public string Title { get; set; } = "";
 
-        [Required, StringLength(200)]
+        [Required(ErrorMessage = "Författare måste fyllas i")]
         public string Author { get; set; } = "";
 
-        [Range(0, 3000)]
+        [Range(0, 3000, ErrorMessage = "År måste vara mellan 0 och 3000")]
         public int PublishedYear { get; set; } = DateTime.Now.Year;
     }
 }
