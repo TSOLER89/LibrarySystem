@@ -23,6 +23,7 @@ namespace LibrarySystem.Tests.Del2
         }
 
         [Fact]
+        // This test verifies that adding a book to the repository saves it to the database
         public async Task AddAsync_ShouldSaveBookToDatabase()
         {
             using var context = CreateContext();
