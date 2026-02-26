@@ -95,6 +95,27 @@ namespace LibrarySystem.Tests.Del2
 
             Assert.False(await context.Books.AnyAsync(b => b.ISBN == "X"));
         }
+
+        [Fact]
+        // This test checks that GetByISBNAsync correctly retrieves a book based on its ISBN by
+        // adding multiple books to the context and verifying the correct one is returned.
+        public async Task GetByISBNAsync_ShouldReturnCorrectBook()
+        {
+            using var context = CreateContext();
+            context.Books.AddRange(
+                new Book { ISBN = "111", Title = "First", Author = "A", PublishedYear = 1999 },
+                new Book { ISBN = "222", Title = "Second", Author = "B", PublishedYear = 2005 }
+            );
+            await context.SaveChangesAsync();
+
+            var repo = new BookRepository(context);
+
+            var found = await repo.GetByISBNAsync("222");
+
+            Assert.NotNull(found);
+            Assert.Equal("Second", found!.Title);
+        }
     }
 
 }
+
