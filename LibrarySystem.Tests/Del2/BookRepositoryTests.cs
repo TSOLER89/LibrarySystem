@@ -144,6 +144,25 @@ namespace LibrarySystem.Tests.Del2
             Assert.Equal("CCC", byIsbn[0].ISBN); // Verify that the correct book is returned based on the ISBN search
         }
 
+
+        [Fact]
+        // This test ensures that searching with an empty string returns all books in the repository by
+        // adding multiple books and verifying that all are returned when the search term is empty.
+        public async Task SearchAsync_EmptyTerm_ShouldReturnAllBooks()
+        {
+            using var context = CreateContext();
+            context.Books.AddRange(
+                new Book { ISBN = "1", Title = "A", Author = "X", PublishedYear = 2000 }, // Book 1
+                new Book { ISBN = "2", Title = "B", Author = "Y", PublishedYear = 2001 } // Book 2
+            );
+            await context.SaveChangesAsync();
+
+            var repo = new BookRepository(context);
+
+            var result = (await repo.SearchAsync("")).ToList();
+
+            Assert.Equal(2, result.Count);
+        }
     }
 
 }
