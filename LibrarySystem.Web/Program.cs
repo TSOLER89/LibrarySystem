@@ -2,6 +2,7 @@ using LibrarySystem.Data;
 using LibrarySystem.Data.Repository;
 using LibrarySystem.Web.Components;
 using Microsoft.EntityFrameworkCore;
+using LibrarySystem.Web.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,10 @@ builder.Services.AddDbContext<LibraryContext>(options =>
 
 //AddScoped betyder: samma repository används under en web-request/session.
 builder.Services.AddScoped<IBookRepository, BookRepository>();
+
+//används under en web-request/session.
+builder.Services.AddScoped<BookService>();
+
 
 var app = builder.Build();
 
