@@ -38,5 +38,24 @@ namespace LibrarySystem.Tests.Del2
             Assert.Equal("Test", saved!.Title);
         }
 
+        [Fact]
+        
+        //should retun all books
+        public async Task GetAllAsync_ShouldReturnAllBooks()
+        {
+            using var context = CreateContext();
+            context.Books.AddRange(
+                new Book { ISBN = "1", Title = "A", Author = "X", PublishedYear = 2000 },
+                new Book { ISBN = "2", Title = "B", Author = "Y", PublishedYear = 2001 }
+            );
+            await context.SaveChangesAsync();
+
+            var repo = new BookRepository(context);
+
+            var all = (await repo.GetAllAsync()).ToList();
+
+            Assert.Equal(2, all.Count);
+        }
+
     }
 }
