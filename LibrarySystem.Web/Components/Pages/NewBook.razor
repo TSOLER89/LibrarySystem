@@ -1,0 +1,73 @@
+﻿@page "/books/new"
+@using System.ComponentModel.DataAnnotations
+@using LibrarySystem.Core.Models
+@inject LibrarySystem.Web.Services.BookService Books
+@inject NavigationManager Nav
+
+<h3>➕ Lägg till ny bok</h3>
+
+<EditForm Model="model" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>ISBN</label><br />
+        <InputText @bind-Value="model.ISBN" />
+        <ValidationMessage For="@(() => model.ISBN)" />
+    </div>
+
+    <div>
+        <label>Titel</label><br />
+        <InputText @bind-Value="model.Title" />
+        <ValidationMessage For="@(() => model.Title)" />
+    </div>
+
+    <div>
+        <label>Författare</label><br />
+        <InputText @bind-Value="model.Author" />
+        <ValidationMessage For="@(() => model.Author)" />
+    </div>
+
+    <div>
+        <label>Publiceringsår</label><br />
+        <InputNumber @bind-Value="model.PublishedYear" />
+        <ValidationMessage For="@(() => model.PublishedYear)" />
+    </div>
+
+    <button type="submit">Spara</button>
+    <a href="/books" style="margin-left: 12px;">Avbryt</a>
+</EditForm>
+
+@code {
+    private NewBookModel model = new();
+
+    private async Task HandleSubmit()
+    {
+        var book = new Book
+        {
+            ISBN = model.ISBN,
+            Title = model.Title,
+            Author = model.Author,
+            PublishedYear = model.PublishedYear,
+            IsAvailable = true
+        };
+
+        await Books.AddAsync(book);
+        Nav.NavigateTo("/books");
+    }
+
+    private class NewBookModel
+    {
+        [Required, StringLength(50)]
+        public string ISBN { get; set; } = "";
+
+        [Required, StringLength(200)]
+        public string Title { get; set; } = "";
+
+        [Required, StringLength(200)]
+        public string Author { get; set; } = "";
+
+        [Range(0, 3000)]
+        public int PublishedYear { get; set; } = DateTime.Now.Year;
+    }
+}
