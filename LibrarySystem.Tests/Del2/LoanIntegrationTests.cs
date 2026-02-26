@@ -76,4 +76,26 @@ public class LoanIntegrationTests
         Assert.True(loan.IsReturned);
         Assert.True(book.IsAvailable);
     }
+
+    [Fact]
+    // This test verifies that a loan is considered overdue when the current date is past the due date.
+
+    public async Task Loan_ShouldBeOverdue_WhenTodayAfterDueDate()
+    {
+        using var context = CreateContext();
+
+        var book = new Book { ISBN = "12", Title = "OverdueBook", Author = "A", PublishedYear = 2020, IsAvailable = true };
+        var member = new Member { Name = "Eva", Email = "eva@test.com", MemberSince = DateTime.Today };
+
+        context.Books.Add(book);
+        context.Members.Add(member);
+        await context.SaveChangesAsync();
+
+        var loan = new Loan(book, member, DateTime.Today.AddDays(-20)); // due = -6 dagar sen
+        context.Loans.Add(loan);
+        await context.SaveChangesAsync();
+
+        Assert.True(loan.IsOverdue(DateTime.Today));
+    }
 }
+
