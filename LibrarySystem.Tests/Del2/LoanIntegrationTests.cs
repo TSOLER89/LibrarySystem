@@ -47,4 +47,33 @@ public class LoanIntegrationTests
         Assert.False(book.IsAvailable);
         Assert.True(await context.Loans.AnyAsync(l => l.BookId == book.Id && l.MemberId == member.Id));
     }
+
+    [Fact]
+    // This test verifies that when a loan is returned,
+    // the associated book becomes available again and the loan is marked as returned.
+    public async Task ReturnBook_ShouldMarkLoanReturned_And_MakeBookAvailable()
+    {
+        using var context = CreateContext();
+
+        var book = new Book { ISBN = "11", Title = "ReturnBook", Author = "A", PublishedYear = 2020, IsAvailable = true };
+        var member = new Member { Name = "Bob", Email = "bob@test.com", MemberSince = DateTime.Today };
+
+        context.Books.Add(book);
+        context.Members.Add(member);
+        await context.SaveChangesAsync();
+
+        var manager = new LoanManager();
+        var loan = manager.CreateLoan(book, member);
+
+        context.Loans.Add(loan);
+        await context.SaveChangesAsync();
+
+        // Act
+        manager.ReturnBook(loan);
+        await context.SaveChangesAsync();
+
+        // Assert
+        Assert.True(loan.IsReturned);
+        Assert.True(book.IsAvailable);
+    }
 }
