@@ -57,5 +57,25 @@ namespace LibrarySystem.Tests.Del2
             Assert.Equal(2, all.Count);
         }
 
+
+        
+        [Fact]
+        //updated books Added UpdateAsync_ShouldUpdateBook test to verify that updating a book's title using BookRepository.UpdateAsync correctly persists changes to the database.
+        public async Task UpdateAsync_ShouldUpdateBook()
+        {
+            using var context = CreateContext();
+            var book = new Book { ISBN = "9", Title = "Old", Author = "A", PublishedYear = 2000 };
+            context.Books.Add(book);
+            await context.SaveChangesAsync();
+
+            var repo = new BookRepository(context);
+
+            book.Title = "New";
+            await repo.UpdateAsync(book);
+
+            var updated = await context.Books.FirstAsync(b => b.ISBN == "9");
+            Assert.Equal("New", updated.Title);
+        }
+
     }
 }
