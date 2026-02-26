@@ -1,7 +1,43 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+@using Microsoft.EntityFrameworkCore
+@inject LibrarySystem.Data.LibraryContext Db
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+
+<h1>BibliotekSystem</h1>
+<p>Välkommen! Här kan du hantera böcker, medlemmar och Lån</p>
+
+@if (statsLoaded == false)
+{
+    <p>Laddar statistik...</p>
+}
+else
+{
+    <ul>
+        <li><b>Antal böcker :</b> @booksCount </li>
+        <li><b>Antal medlemmar:</b> @membersCount</li>
+        <li><b>Aktiva lån:</b> @activeLoansCount</li>
+    </ul>
+
+    <p>
+        <a href="/books">Gå till boklistan</a>
+    </p>
+    
+    @code {
+    private bool statsLoaded = false;
+        private int booksCount;
+        private int membersCount;
+        private int activeLoansCount;
+      
+
+    // När komponenten initieras, hämta statistik från databasen
+        protected override async Task OnInitializedAsync()
+        {
+            booksCount = await Db.Books.CountAsync();
+            membersCount = await Db.Members.CountAsync();
+            activeLoansCount = await Db.Loans.Where(l => l.ReturnDate == null).CountAsync();
+            statsLoaded = true;
+        }
+}
+}
