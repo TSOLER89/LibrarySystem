@@ -115,6 +115,35 @@ namespace LibrarySystem.Tests.Del2
             Assert.NotNull(found);
             Assert.Equal("Second", found!.Title);
         }
+
+        [Fact]
+        // This test validates that SearchAsync can find books by matching the search term against the title, author, or ISBN.
+        public async Task SearchAsync_ShouldFindBooksByTitle_Author_Or_ISBN()
+        {
+            using var context = CreateContext();
+            context.Books.AddRange(
+                new Book { ISBN = "AAA", Title = "Clean Code", Author = "Robert Martin", PublishedYear = 2008 },
+                new Book { ISBN = "BBB", Title = "1984", Author = "George Orwell", PublishedYear = 1949 },
+                new Book { ISBN = "CCC", Title = "Hobbiten", Author = "Tolkien", PublishedYear = 1937 }
+            );
+            await context.SaveChangesAsync();
+
+            var repo = new BookRepository(context);
+
+            var byTitle = (await repo.SearchAsync("Clean")).ToList(); // Should match "Clean Code"
+            var byAuthor = (await repo.SearchAsync("Orwell")).ToList(); // Should match "1984"
+            var byIsbn = (await repo.SearchAsync("CCC")).ToList(); // Should match "Hobbiten"
+
+            Assert.Single(byTitle);
+            Assert.Equal("AAA", byTitle[0].ISBN); // Verify that the correct book is returned based on the title search
+
+            Assert.Single(byAuthor);
+            Assert.Equal("BBB", byAuthor[0].ISBN); // Verify that the correct book is returned based on the author search
+
+            Assert.Single(byIsbn);
+            Assert.Equal("CCC", byIsbn[0].ISBN); // Verify that the correct book is returned based on the ISBN search
+        }
+
     }
 
 }
