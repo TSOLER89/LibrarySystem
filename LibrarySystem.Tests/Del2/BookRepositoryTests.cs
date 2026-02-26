@@ -77,5 +77,24 @@ namespace LibrarySystem.Tests.Del2
             Assert.Equal("New", updated.Title);
         }
 
+        [Fact]
+        //This test ensures that DeleteAsync properly removes a book from the database by
+        //creating, saving, deleting, and verifying the absence of the book.
+
+
+        public async Task DeleteAsync_ShouldRemoveBook()
+        {
+            using var context = CreateContext();
+            var book = new Book { ISBN = "X", Title = "ToDelete", Author = "A", PublishedYear = 2000 };
+            context.Books.Add(book);
+            await context.SaveChangesAsync();
+
+            var repo = new BookRepository(context);
+
+            await repo.DeleteAsync(book.Id);
+
+            Assert.False(await context.Books.AnyAsync(b => b.ISBN == "X"));
+        }
     }
+
 }
