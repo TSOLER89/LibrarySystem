@@ -24,15 +24,16 @@ namespace LibrarySystem.Data.Repository
 		}
 
 
-		public async Task<Book?> GetByIdAsync(int id)
-		{
-			return await _db.Books
-				.Include(b => b.Loans) //tar med lån när du hämtar bokdetaljer.
-				.FirstOrDefaultAsync(b => b.Id == id);
-		}
+        public async Task<Book?> GetByIdAsync(int id)
+        {
+            return await _db.Books
+                .Include(b => b.Loans)
+                    .ThenInclude(l => l.Member)
+                .FirstOrDefaultAsync(b => b.Id == id);
+        }
 
 
-		public async Task<Book?> GetByISBNAsync(string isbn)
+        public async Task<Book?> GetByISBNAsync(string isbn)
 		{
 			return await _db.Books
 				.FirstOrDefaultAsync(b => b.ISBN == isbn);
