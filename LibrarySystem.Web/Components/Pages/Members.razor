@@ -1,0 +1,58 @@
+﻿@page "/members"
+@rendermode InteractiveServer
+@using LibrarySystem.Core.Models
+@inject LibrarySystem.Web.Services.MemberService MemberService
+
+
+<h3>👥 Medlemmar</h3>
+
+<a class="btn btn-success mb-3" href="/members/new">+ Lägg till medlem</a>
+
+@if (members is null)
+{
+    <p>Laddar...</p>
+}
+else if (!members.Any())
+{
+    <p>Inga medlemmar registrerade.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Namn</th>
+                <th>Email</th>
+                <th>Medlem sedan</th>
+                <th>Aktiva lån</th>
+                <th>Åtgärder</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var member in members)
+            {
+                <tr>
+                    <td>@member.Name</td>
+                    <td>@member.Email</td>
+                    <td>@member.MemberSince.ToShortDateString()</td>
+                    <td>@member.Loans.Count(l => !l.IsReturned)</td>
+                    <td>
+                        <a class="btn btn-sm btn-outline-primary"
+                           href="@($"/members/{member.Id}")">
+                            Detaljer
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Member>? members;
+
+    protected override async Task OnInitializedAsync()
+    {
+        members = (await MemberService.GetAllAsync()).ToList();
+    }
+}

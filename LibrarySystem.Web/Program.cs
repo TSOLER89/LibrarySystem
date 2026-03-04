@@ -1,5 +1,6 @@
 using LibrarySystem.Data;
 using LibrarySystem.Data.Repository;
+using LibrarySystem.Web;
 using LibrarySystem.Web.Components;
 using LibrarySystem.Web.Services;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
+builder.Services.AddScoped<MemberService>();
 
 // Razor Components (Blazor Server i .NET 8)
 builder.Services.AddRazorComponents()
