@@ -7,31 +7,32 @@
 
 <h3>➕ Lägg till ny bok</h3>
 
-<EditForm EditContext="_editContext" OnSubmit="HandleSubmit" FormName="NewBookForm" method="post">
+<EditForm Model="model" OnValidSubmit="HandleValidSubmit" FormName="NewBookForm">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
     <div class="mb-3">
-        <label>ISBN</label><br />
-        <InputText class="form-control" @bind-Value="model.ISBN" />
+        <label for="isbn">ISBN</label>
+        <InputText id="isbn" class="form-control" @bind-Value="model.ISBN" />
         <ValidationMessage For="@(() => model.ISBN)" />
+        <small class="text-muted">Skriv 10 eller 13 siffror (t.ex. 9780451524935)</small>
     </div>
 
     <div class="mb-3">
-        <label>Titel</label><br />
-        <InputText class="form-control" @bind-Value="model.Title" />
+        <label for="title">Titel</label>
+        <InputText id="title" class="form-control" @bind-Value="model.Title" />
         <ValidationMessage For="@(() => model.Title)" />
     </div>
 
     <div class="mb-3">
-        <label>Författare</label><br />
-        <InputText class="form-control" @bind-Value="model.Author" />
+        <label for="author">Författare</label>
+        <InputText id="author" class="form-control" @bind-Value="model.Author" />
         <ValidationMessage For="@(() => model.Author)" />
     </div>
 
     <div class="mb-3">
-        <label>Publiceringsår</label><br />
-        <InputNumber class="form-control" @bind-Value="model.PublishedYear" />
+        <label for="year">Publiceringsår</label>
+        <InputNumber id="year" class="form-control" @bind-Value="model.PublishedYear" />
         <ValidationMessage For="@(() => model.PublishedYear)" />
     </div>
 
@@ -41,18 +42,10 @@
 
 @code {
     private NewBookModel model = new();
-    private EditContext _editContext = default!;
 
-    protected override void OnInitialized()
+    private async Task HandleValidSubmit()
     {
-        _editContext = new EditContext(model);
-    }
-
-    private async Task HandleSubmit()
-    {
-        if (!_editContext.Validate())
-            return;
-
+        // Skapa en riktig Book och spara i DB
         var book = new Book
         {
             ISBN = model.ISBN.Trim(),
@@ -63,12 +56,13 @@
         };
 
         await BookService.AddAsync(book);
-        Nav.NavigateTo("/books");
+        Nav.NavigateTo("/books", forceLoad: true);
     }
 
     private class NewBookModel
     {
-        [Required(ErrorMessage = "ISBN måste fyllas i")]
+        [Required(ErrorMessage = "ISBN måste fyllas 10/13 siffror")]
+        [RegularExpression(@"^(?:\d{10}|\d{13})$", ErrorMessage = "ISBN måste vara 10 eller 13 siffror")]
         public string ISBN { get; set; } = "";
 
         [Required(ErrorMessage = "Titel måste fyllas i")]
@@ -77,7 +71,7 @@
         [Required(ErrorMessage = "Författare måste fyllas i")]
         public string Author { get; set; } = "";
 
-        [Range(0, 3000, ErrorMessage = "År måste vara mellan 0 och 3000")]
+        [Range(1450, 2100, ErrorMessage = "År måste vara mellan 1450 och 2100")]
         public int PublishedYear { get; set; } = DateTime.Now.Year;
     }
 }
