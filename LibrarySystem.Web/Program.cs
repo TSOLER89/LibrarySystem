@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddScoped<IMemberRepository, MemberRepository>();
+
 // Razor Components (Blazor Server i .NET 8)
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
