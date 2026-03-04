@@ -1,58 +1,86 @@
 ﻿@page "/books"
+@rendermode InteractiveServer
 @using LibrarySystem.Core.Models
 @inject LibrarySystem.Web.Services.BookService BookService
 
 <h3>📚 Boklista</h3>
 
-<div style="margin-bottom: 12px;">
-    <input placeholder="Sök på titel, författare eller ISBN..."
-           @bind="searchTerm" @bind:event="oninput" />
-    <button type="button" @onclick="DoSearch">Sök</button>
-    <a href="/books/new" style="margin-left: 12px;">+ Lägg till bok</a>
+<div class="mb-3 d-flex gap-2 align-items-center">
+    <input class="form-control"
+           style="max-width: 420px;"
+           placeholder="Sök på titel, författare eller ISBN..."
+           @bind="searchTerm"
+           @bind:event="oninput" />
+
+    <button class="btn btn-primary" type="button" @onclick="DoSearch">Sök</button>
+    <button class="btn btn-outline-secondary" type="button" @onclick="ClearSearch">Rensa</button>
+
+    <a class="btn btn-success ms-auto" href="/books/new">+ Lägg till bok</a>
 </div>
 
 @if (items is null)
 {
     <p>Laddar...</p>
 }
+else if (items.Count == 0)
+{
+    <p>Inga böcker hittades.</p>
+}
 else
 {
-    <table class="table">
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>
-                    <button type="button" @onclick="() => SortBy(nameof(Book.ISBN))">
-                        ISBN
+                    <button class="btn btn-link p-0" type="button" @onclick="() => SortBy(nameof(Book.ISBN))">
+                        ISBN @(SortIndicator(nameof(Book.ISBN)))
                     </button>
                 </th>
+
                 <th>
-                    <button type="button" @onclick="() => SortBy(nameof(Book.Title))">
-                        Titel
+                    <button class="btn btn-link p-0" type="button" @onclick="() => SortBy(nameof(Book.Title))">
+                        Titel @(SortIndicator(nameof(Book.Title)))
                     </button>
                 </th>
+
                 <th>
-                    <button type="button" @onclick="() => SortBy(nameof(Book.Author))">
-                        Författare
+                    <button class="btn btn-link p-0" type="button" @onclick="() => SortBy(nameof(Book.Author))">
+                        Författare @(SortIndicator(nameof(Book.Author)))
                     </button>
                 </th>
+
                 <th>
-                    <button type="button" @onclick="() => SortBy(nameof(Book.PublishedYear))">
-                        År
+                    <button class="btn btn-link p-0" type="button" @onclick="() => SortBy(nameof(Book.PublishedYear))">
+                        År @(SortIndicator(nameof(Book.PublishedYear)))
                     </button>
                 </th>
+
                 <th>Status</th>
+                <th style="width: 220px;">Åtgärder</th>
             </tr>
         </thead>
+
         <tbody>
-            @foreach (var b in items)
+            @foreach (var book in items)
             {
                 <tr>
-                    <td>@b.ISBN</td>
-                    <td>@b.Title</td>
-                    <td>@b.Author</td>
-                    <td>@b.PublishedYear</td>
+                    <td>@book.ISBN</td>
+                    <td>@book.Title</td>
+                    <td>@book.Author</td>
+                    <td>@book.PublishedYear</td>
                     <td>
-                        @(b.IsAvailable ? "🟢 Tillgänglig" : "🔴 Utlånad")
+                        @(book.IsAvailable ? "🟢 Tillgänglig" : "🔴 Utlånad")
+                    </td>
+
+                    <td class="d-flex gap-2">
+                        <a class="btn btn-sm btn-outline-primary" href="@($"/books/{book.Id}")">Detaljer</a>
+                        <a class="btn btn-sm btn-outline-secondary" href="@($"/books/edit/{book.Id}")">Edit</a>
+
+                        <button class="btn btn-sm btn-danger"
+                                type="button"
+                                @onclick="() => DeleteBook(book.Id)">
+                            Ta bort
+                        </button>
                     </td>
                 </tr>
             }
@@ -62,6 +90,7 @@ else
 
 @code {
     private List<Book>? items;
+
     private string searchTerm = "";
     private string sortColumn = nameof(Book.Title);
     private bool sortAsc = true;
@@ -83,12 +112,22 @@ else
         ApplySort();
     }
 
+    private async Task ClearSearch()
+    {
+        searchTerm = "";
+        await LoadAll();
+    }
+
+    private async Task DeleteBook(int id)
+    {
+        await BookService.DeleteAsync(id);
+        await LoadAll();
+    }
+
     private void SortBy(string column)
     {
         if (sortColumn == column)
-        {
             sortAsc = !sortAsc;
-        }
         else
         {
             sortColumn = column;
@@ -104,23 +143,25 @@ else
 
         items = sortColumn switch
         {
-            nameof(Book.ISBN) =>
-                sortAsc ? items.OrderBy(b => b.ISBN).ToList()
-                        : items.OrderByDescending(b => b.ISBN).ToList(),
+            nameof(Book.ISBN) => sortAsc ? items.OrderBy(b => b.ISBN).ToList()
+                                        : items.OrderByDescending(b => b.ISBN).ToList(),
 
-            nameof(Book.Title) =>
-                sortAsc ? items.OrderBy(b => b.Title).ToList()
-                        : items.OrderByDescending(b => b.Title).ToList(),
+            nameof(Book.Title) => sortAsc ? items.OrderBy(b => b.Title).ToList()
+                                          : items.OrderByDescending(b => b.Title).ToList(),
 
-            nameof(Book.Author) =>
-                sortAsc ? items.OrderBy(b => b.Author).ToList()
-                        : items.OrderByDescending(b => b.Author).ToList(),
+            nameof(Book.Author) => sortAsc ? items.OrderBy(b => b.Author).ToList()
+                                           : items.OrderByDescending(b => b.Author).ToList(),
 
-            nameof(Book.PublishedYear) =>
-                sortAsc ? items.OrderBy(b => b.PublishedYear).ToList()
-                        : items.OrderByDescending(b => b.PublishedYear).ToList(),
+            nameof(Book.PublishedYear) => sortAsc ? items.OrderBy(b => b.PublishedYear).ToList()
+                                                  : items.OrderByDescending(b => b.PublishedYear).ToList(),
 
             _ => items
         };
+    }
+
+    private string SortIndicator(string column)
+    {
+        if (sortColumn != column) return "";
+        return sortAsc ? "▲" : "▼";
     }
 }
