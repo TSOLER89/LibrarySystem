@@ -1,0 +1,82 @@
+﻿@page "/books/{Id:int}"
+@rendermode InteractiveServer
+@using LibrarySystem.Core.Models
+@inject LibrarySystem.Web.Services.BookService BookService
+@inject NavigationManager Nav
+
+<h3>📖 Bokdetaljer</h3>
+
+@if (loading)
+{
+    <p>Laddar...</p>
+}
+else if (book is null)
+{
+    <div class="alert alert-warning">
+        Kunde inte hitta boken.
+    </div>
+    <a class="btn btn-link" href="/books">Tillbaka</a>
+}
+else
+{
+    <div class="card p-3 mb-4">
+        <h4>@book.Title</h4>
+        <p><strong>ISBN:</strong> @book.ISBN</p>
+        <p><strong>Författare:</strong> @book.Author</p>
+        <p><strong>År:</strong> @book.PublishedYear</p>
+        <p>
+            <strong>Status:</strong>
+            @(book.IsAvailable ? "🟢 Tillgänglig" : "🔴 Utlånad")
+        </p>
+    </div>
+
+    <h5>Lånehistorik</h5>
+
+    @if (book.Loans is null || !book.Loans.Any())
+    {
+        <p>Inga lån registrerade.</p>
+    }
+    else
+    {
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Medlem</th>
+                    <th>Lånedatum</th>
+                    <th>Förfallodatum</th>
+                    <th>Returnerad</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var loan in book.Loans)
+                {
+                    <tr>
+                        <td>@loan.Member?.Name</td>
+                        <td>@loan.LoanDate.ToShortDateString()</td>
+                        <td>@loan.DueDate.ToShortDateString()</td>
+                        <td>
+                            @(loan.IsReturned
+                                            ? $"Ja ({loan.ReturnDate?.ToShortDateString()})"
+                                            : "Nej")
+            </td>
+        </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <a class="btn btn-outline-secondary" href="/books">Tillbaka</a>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Book? book;
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        book = await BookService.GetByIdAsync(Id);
+        loading = false;
+    }
+}
