@@ -15,28 +15,33 @@ public class LoanService
     public Task<IEnumerable<Loan>> GetActiveLoansAsync()
         => _repo.GetActiveLoansAsync();
 
+
+    // Skapa ett lån: val av bok och medlem, kontrollera att boken är tillgänglig, skapa lånet och uppdatera bokstatus
     public async Task CreateLoanAsync(int bookId, int memberId)
     {
-        var book = await _repo.GetBookByIdAsync(bookId)
-            ?? throw new InvalidOperationException("Book not found");
+        if (bookId <= 0) throw new ArgumentException("Välj en bok.", nameof(bookId));
+        if (memberId <= 0) throw new ArgumentException("Välj en medlem.", nameof(memberId));
 
-        var member = await _repo.GetMemberByIdAsync(memberId)
-            ?? throw new InvalidOperationException("Member not found");
+        // Hämta entiteter TRACKADE i samma DbContext
+        var book = await _repo.GetBookByIdAsync(bookId);
+        if (book is null) throw new InvalidOperationException("Boken hittades inte.");
 
         if (!book.IsAvailable)
-            throw new InvalidOperationException("Book is not available");
+            throw new InvalidOperationException("Boken är redan utlånad.");
 
-        // skapa lån
+        var member = await _repo.GetMemberByIdAsync(memberId);
+        if (member is null) throw new InvalidOperationException("Medlemmen hittades inte.");
+
+        // Skapa lånet och sätt FK (BookId/MemberId) explicit
         var loan = new Loan
         {
-            BookId = book.Id,
-            MemberId = member.Id,
+            BookId = bookId,
+            MemberId = memberId,
             LoanDate = DateTime.Now,
-            DueDate = DateTime.Now.AddDays(14),
-            ReturnDate = null
+            DueDate = DateTime.Now.AddDays(14)
         };
 
-        // markera bok
+        // Uppdatera bokstatus
         book.IsAvailable = false;
 
         await _repo.AddAsync(loan);
