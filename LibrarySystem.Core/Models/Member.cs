@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -34,14 +35,18 @@ namespace LibrarySystem.Core.Models
         // Del 1-kod kan ha anropat Member.AddLoan(...)
         public void AddLoan(Loan loan)
         {
+            if (loan == null) return;
             Loans.Add(loan);
         }
 
         // Del 1-kod kan ha använt Member.BorrowedBooks
-        public IReadOnlyList<Book> BorrowedBooks =>
+        [NotMapped]
+           public IReadOnlyList<Book> BorrowedBooks =>
             Loans
                 .Where(l => !l.IsReturned)
                 .Select(l => l.Book)
+                .Where(b => b is not null)
+                .Cast<Book>()
                 .ToList();
 
         // Ny "riktiga" metod (bra för tester där du vill styra datum)
