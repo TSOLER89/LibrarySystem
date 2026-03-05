@@ -12,4 +12,7 @@ public interface IMemberRepository
     Task<IEnumerable<Member>> GetAllAsync();
     Task<Member?> GetByIdAsync(int id);
     Task AddAsync(Member member);
+
+    // För uppdatering av medlemsinformation, inte lån
+    Task UpdateAsync(Member member);
 }

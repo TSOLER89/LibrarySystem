@@ -17,6 +17,8 @@ public class MemberRepository : IMemberRepository
         _db = db;
     }
 
+
+    // Hämta alla medlemmar med deras lån
     public async Task<IEnumerable<Member>> GetAllAsync()
     {
         return await _db.Members
@@ -24,6 +26,7 @@ public class MemberRepository : IMemberRepository
             .ToListAsync();
     }
 
+    // Hämta en medlem med deras lån och de lånade böckerna
     public async Task<Member?> GetByIdAsync(int id)
     {
         return await _db.Members
@@ -32,9 +35,18 @@ public class MemberRepository : IMemberRepository
             .FirstOrDefaultAsync(m => m.Id == id);
     }
 
+    // För att lägga till en ny medlem, inte lån
     public async Task AddAsync(Member member)
     {
         _db.Members.Add(member);
         await _db.SaveChangesAsync();
     }
+
+    // För uppdatering av medlemsinformation, inte lån
+    public async Task UpdateAsync(Member member)
+    {
+        _db.Members.Update(member);
+        await _db.SaveChangesAsync();
+    }
+
 }
