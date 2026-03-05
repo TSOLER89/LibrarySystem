@@ -1,0 +1,172 @@
+﻿@page "/loans"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using LibrarySystem.Core.Models
+@inject LibrarySystem.Web.Services.LoanService LoanService
+@inject LibrarySystem.Web.Services.BookService BookService
+@inject LibrarySystem.Web.Services.MemberService MemberService
+
+<h3>📦 Utlåning</h3>
+
+<div class="card p-3 mb-4">
+    <h5>Skapa nytt lån</h5>
+
+    @if (!string.IsNullOrWhiteSpace(error))
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(success))
+    {
+        <div class="alert alert-success">@success</div>
+    }
+
+    <EditForm Model="model" OnValidSubmit="CreateLoan" FormName="CreateLoanForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Bok</label>
+            <InputSelect class="form-select" @bind-Value="model.BookId">
+                <option value="0">-- välj bok --</option>
+                @foreach (var b in books)
+                {
+                    <option value="@b.Id">@b.Title (@b.ISBN)</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => model.BookId)" />
+        </div>
+
+        <div class="mb-3">
+            <label>Medlem</label>
+            <InputSelect class="form-select" @bind-Value="model.MemberId">
+                <option value="0">-- välj medlem --</option>
+                @foreach (var m in members)
+                {
+                    <option value="@m.Id">@m.Name (@m.Email)</option>
+                }
+            </InputSelect>
+            <ValidationMessage For="@(() => model.MemberId)" />
+        </div>
+
+        <button class="btn btn-primary" type="submit">Låna</button>
+    </EditForm>
+</div>
+
+<h5>Aktiva lån</h5>
+
+@if (activeLoans is null)
+{
+    <p>Laddar...</p>
+}
+else if (activeLoans.Count == 0)
+{
+    <p>Inga aktiva lån.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Bok</th>
+                <th>Medlem</th>
+                <th>Lånedatum</th>
+                <th>Förfallodatum</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var loan in activeLoans)
+            {
+                var overdue = DateTime.Now.Date > loan.DueDate.Date;
+
+                <tr class="@(overdue ? "table-danger" : "")">
+                    <td>@loan.Book?.Title</td>
+                    <td>@loan.Member?.Name</td>
+                    <td>@loan.LoanDate.ToShortDateString()</td>
+                    <td>@loan.DueDate.ToShortDateString()</td>
+                    <td>@(overdue ? "⚠️ Försenad" : "OK")</td>
+                    <td>
+                        <button class="btn btn-sm btn-success"
+                                type="button"
+                                @onclick="() => Return(loan.BookId)">
+                            Returnera
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Book> books = new();
+    private List<Member> members = new();
+    private List<Loan>? activeLoans;
+
+    private string? error;
+    private string? success;
+
+    private CreateLoanModel model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadAll();
+    }
+
+    private async Task ReloadAll()
+    {
+        // bara tillgängliga böcker i dropdown
+        books = (await BookService.GetAllAsync()).Where(b => b.IsAvailable).ToList();
+        members = (await MemberService.GetAllAsync()).ToList();
+        activeLoans = (await LoanService.GetActiveLoansAsync()).ToList();
+
+        error = null;
+        success = null;
+        model = new();
+    }
+
+    private async Task CreateLoan()
+    {
+        try
+        {
+            error = null;
+            success = null;
+
+            await LoanService.CreateLoanAsync(model.BookId, model.MemberId);
+            success = "Lånet skapades!";
+            await ReloadAll();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    private async Task Return(int bookId)
+    {
+        try
+        {
+            error = null;
+            success = null;
+
+            await LoanService.ReturnBookAsync(bookId);
+            success = "Boken returnerades!";
+            await ReloadAll();
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    private class CreateLoanModel
+    {
+        [Range(1, int.MaxValue, ErrorMessage = "Välj en bok")]
+        public int BookId { get; set; }
+
+        [Range(1, int.MaxValue, ErrorMessage = "Välj en medlem")]
+        public int MemberId { get; set; }
+    }
+}

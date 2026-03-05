@@ -7,8 +7,14 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Medlemskap
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<MemberService>();
+
+// Lån
+builder.Services.AddScoped<ILoanRepository, LoanRepository>();
+builder.Services.AddScoped<LoanService>();
+
 
 // Razor Components (Blazor Server i .NET 8)
 builder.Services.AddRazorComponents()
