@@ -1,0 +1,96 @@
+﻿@page "/members/edit/{Id:int}"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using LibrarySystem.Core.Models
+@inject LibrarySystem.Web.Services.MemberService MemberService
+@inject NavigationManager Nav
+
+<h3>✏️ Redigera medlem</h3>
+
+@if (!string.IsNullOrWhiteSpace(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+
+@if (member is null)
+{
+    <p>Laddar...</p>
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="Save" FormName="EditMemberForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Namn</label>
+            <InputText class="form-control" @bind-Value="model.Name" />
+            <ValidationMessage For="@(() => model.Name)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <InputText class="form-control" @bind-Value="model.Email" />
+            <ValidationMessage For="@(() => model.Email)" />
+        </div>
+
+        <button class="btn btn-primary" type="submit">Spara</button>
+        <button class="btn btn-link" type="button" @onclick="@(() => Nav.NavigateTo("/members"))">Avbryt</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Member? member;
+    private EditMemberModel model = new();
+    private string? error;
+
+    protected override async Task OnInitializedAsync()
+    {
+        member = await MemberService.GetByIdAsync(Id);
+        if (member is null)
+        {
+            error = "Medlem hittades inte.";
+            return;
+        }
+
+        model = new EditMemberModel
+        {
+            Name = member.Name,
+            Email = member.Email
+        };
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            error = null;
+
+            if (member is null) return;
+
+            member.Name = model.Name;
+            member.Email = model.Email;
+
+            await MemberService.UpdateAsync(member);
+
+            Nav.NavigateTo("/members");
+        }
+        catch (Exception ex)
+        {
+            error = ex.Message;
+        }
+    }
+
+    private class EditMemberModel
+    {
+        [Required(ErrorMessage = "Namn måste fyllas i")]
+        public string Name { get; set; } = "";
+
+        [Required(ErrorMessage = "Email måste fyllas i")]
+        [EmailAddress(ErrorMessage = "Email är inte i rätt format")]
+        public string Email { get; set; } = "";
+    }
+}

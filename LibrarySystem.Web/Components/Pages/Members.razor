@@ -3,18 +3,19 @@
 @using LibrarySystem.Core.Models
 @inject LibrarySystem.Web.Services.MemberService MemberService
 
+<h3>👤 Medlemmar</h3>
 
-<h3>👥 Medlemmar</h3>
-
-<a class="btn btn-success mb-3" href="/members/new">+ Lägg till medlem</a>
+<div class="mb-3">
+    <a class="btn btn-success" href="/members/new">+ Lägg till medlem</a>
+</div>
 
 @if (members is null)
 {
     <p>Laddar...</p>
 }
-else if (!members.Any())
+else if (members.Count == 0)
 {
-    <p>Inga medlemmar registrerade.</p>
+    <p>Inga medlemmar ännu.</p>
 }
 else
 {
@@ -25,22 +26,20 @@ else
                 <th>Email</th>
                 <th>Medlem sedan</th>
                 <th>Aktiva lån</th>
-                <th>Åtgärder</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var member in members)
+            @foreach (var m in members)
             {
                 <tr>
-                    <td>@member.Name</td>
-                    <td>@member.Email</td>
-                    <td>@member.MemberSince.ToShortDateString()</td>
-                    <td>@member.Loans.Count(l => !l.IsReturned)</td>
-                    <td>
-                        <a class="btn btn-sm btn-outline-primary"
-                           href="@($"/members/{member.Id}")">
-                            Detaljer
-                        </a>
+                    <td>@m.Name</td>
+                    <td>@m.Email</td>
+                    <td>@m.MemberSince.ToShortDateString()</td>
+                    <td>@(m.Loans?.Count(l => !l.IsReturned) ?? 0)</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary" href="@($"/members/edit/{m.Id}")">Edit</a>
+                        <a class="btn btn-sm btn-outline-secondary" href="@($"/members/{m.Id}")">Details</a>
                     </td>
                 </tr>
             }
