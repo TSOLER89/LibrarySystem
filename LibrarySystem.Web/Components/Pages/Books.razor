@@ -69,7 +69,14 @@ else
                     <td>@book.Author</td>
                     <td>@book.PublishedYear</td>
                     <td>
-                        @(book.IsAvailable ? "🟢 Tillgänglig" : "🔴 Utlånad")
+                        @if (book.IsAvailable)
+                        {
+                            <span class="badge bg-success">Tillgänglig</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Utlånad</span>
+                        }
                     </td>
 
                     <td class="d-flex gap-2">
