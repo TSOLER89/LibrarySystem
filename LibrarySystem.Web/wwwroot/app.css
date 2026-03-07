@@ -103,6 +103,7 @@ main {
     background: transparent;
 }
 
+
 .top-row {
     background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(10px);
@@ -246,4 +247,81 @@ a.btn-link {
 
 input::placeholder {
     color: #9ca3af;
+}
+
+
+/* ===== Better sidebar + mobile ===== */
+
+.sidebar .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    font-size: 1rem;
+    line-height: 1.2;
+    min-height: 44px;
+}
+
+    .sidebar .nav-link span {
+        font-size: 1.1rem;
+        width: 20px;
+        text-align: center;
+    }
+
+.nav-item {
+    margin-bottom: 0.2rem;
+}
+
+.top-row {
+    padding: 0.75rem 1rem;
+}
+
+.content {
+    padding: 1rem;
+}
+
+/* Make tables scroll nicely on small screens */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 12px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        min-height: auto;
+    }
+
+        .sidebar .nav-link {
+            font-size: 0.95rem;
+            padding: 0.75rem 0.9rem;
+            margin: 0.2rem 0.5rem;
+        }
+
+    .content {
+        padding: 0.8rem;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    h2, h3 {
+        font-size: 1.4rem;
+    }
+
+    .btn {
+        font-size: 0.95rem;
+        padding: 0.55rem 0.85rem;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: 0.95rem;
+        padding: 0.65rem 0.85rem;
+    }
+
+    .table {
+        font-size: 0.92rem;
+    }
 }

@@ -24,16 +24,16 @@ namespace LibrarySystem.Data.Repository
 		}
 
 
-        public async Task<Book?> GetByIdAsync(int id)
-        {
-            return await _db.Books
-                .Include(b => b.Loans)
-                    .ThenInclude(l => l.Member)
-                .FirstOrDefaultAsync(b => b.Id == id);
-        }
+		public async Task<Book?> GetByIdAsync(int id)
+		{
+			return await _db.Books
+				.Include(b => b.Loans)
+					.ThenInclude(l => l.Member)
+				.FirstOrDefaultAsync(b => b.Id == id);
+		}
 
 
-        public async Task<Book?> GetByISBNAsync(string isbn)
+		public async Task<Book?> GetByISBNAsync(string isbn)
 		{
 			return await _db.Books
 				.FirstOrDefaultAsync(b => b.ISBN == isbn);
@@ -60,20 +60,23 @@ namespace LibrarySystem.Data.Repository
 			await _db.SaveChangesAsync(); //SaveChangesAsync() sparar ändringar i DB.
 		}
 
+
+		// gör sökningen case insensitive, via titel, via författare, via ISBN
 		public async Task<IEnumerable<Book>> SearchAsync(string searchTerm)
 		{
 			if (string.IsNullOrWhiteSpace(searchTerm))
 				return await GetAllAsync();
 
-			searchTerm = searchTerm.Trim();
+			searchTerm = searchTerm.Trim().ToLower();
 
 			return await _db.Books
-				.AsNoTracking() //AsNoTracking() gör det snabbare när du bara ska läsa data.
+				.AsNoTracking()
 				.Where(b =>
-					b.Title.Contains(searchTerm) ||
-					b.Author.Contains(searchTerm) ||
-					b.ISBN.Contains(searchTerm))
+					b.Title.ToLower().Contains(searchTerm) ||
+					b.Author.ToLower().Contains(searchTerm) ||
+					b.ISBN.ToLower().Contains(searchTerm))
 				.ToListAsync();
 		}
 	}
 }
+	
