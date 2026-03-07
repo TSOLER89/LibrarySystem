@@ -61,22 +61,27 @@ namespace LibrarySystem.Data.Repository
 		}
 
 
-		// gör sökningen case insensitive, via titel, via författare, via ISBN
-		public async Task<IEnumerable<Book>> SearchAsync(string searchTerm)
-		{
-			if (string.IsNullOrWhiteSpace(searchTerm))
-				return await GetAllAsync();
+        // gör sökningen case insensitive, via titel, via författare, via ISBN
+        public async Task<IEnumerable<Book>> SearchAsync(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return await GetAllAsync();
 
-			searchTerm = searchTerm.Trim().ToLower();
+            searchTerm = searchTerm
+                .Trim()
+                .Replace("-", "")
+                .Replace(" ", "")
+                .ToLower();
 
-			return await _db.Books
-				.AsNoTracking()
-				.Where(b =>
-					b.Title.ToLower().Contains(searchTerm) ||
-					b.Author.ToLower().Contains(searchTerm) ||
-					b.ISBN.ToLower().Contains(searchTerm))
-				.ToListAsync();
-		}
-	}
+            return await _db.Books
+                .AsNoTracking()
+                .Where(b =>
+                    b.Title.ToLower().Contains(searchTerm) ||
+                    b.Author.ToLower().Contains(searchTerm) ||
+                    b.ISBN.Replace("-", "").Contains(searchTerm) ||
+                    b.PublishedYear.ToString().Contains(searchTerm))
+                .ToListAsync();
+        }
+    }
 }
 	
