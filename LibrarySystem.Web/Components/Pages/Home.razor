@@ -1,43 +1,255 @@
 ﻿@page "/"
-
 @using Microsoft.EntityFrameworkCore
 @inject LibrarySystem.Data.LibraryContext Db
 
+<PageTitle>Hem - BibliotekSystem</PageTitle>
 
+<div class="home-container">
+    <div class="hero-section">
+        <h1 class="display-4">📚 BibliotekSystem</h1>
+        <p class="lead">Välkommen till ditt moderna bibliotekshanteringssystem</p>
+    </div>
 
-<h1>BibliotekSystem</h1>
-<p>Välkommen! Här kan du hantera böcker, medlemmar och Lån</p>
+    @if (!statsLoaded)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Laddar statistik...</span>
+            </div>
+            <p class="mt-2">Laddar statistik...</p>
+        </div>
+    }
+    else
+    {
+        <div class="stats-grid">
+            <div class="stat-card books">
+                <div class="stat-icon">📚</div>
+                <div class="stat-content">
+                    <h3>@booksCount</h3>
+                    <p>Böcker i katalogen</p>
+                </div>
+                <a href="/books" class="stretched-link"></a>
+            </div>
 
-@if (statsLoaded == false)
-{
-    <p>Laddar statistik...</p>
-}
-else
-{
-    <ul>
-        <li><b>Antal böcker :</b> @booksCount </li>
-        <li><b>Antal medlemmar:</b> @membersCount</li>
-        <li><b>Aktiva lån:</b> @activeLoansCount</li>
-    </ul>
+            <div class="stat-card members">
+                <div class="stat-icon">👥</div>
+                <div class="stat-content">
+                    <h3>@membersCount</h3>
+                    <p>Registrerade medlemmar</p>
+                </div>
+                <a href="/members" class="stretched-link"></a>
+            </div>
 
-    <p>
-        <a href="/books">Gå till boklistan</a>
-    </p>
-    
-    @code {
+            <div class="stat-card loans">
+                <div class="stat-icon">📦</div>
+                <div class="stat-content">
+                    <h3>@activeLoansCount</h3>
+                    <p>Aktiva lån</p>
+                </div>
+                <a href="/loans" class="stretched-link"></a>
+            </div>
+        </div>
+
+        <div class="quick-actions mt-5">
+            <h2 class="mb-4">Snabbåtkomst</h2>
+            <div class="action-grid">
+                <a href="/books" class="action-card">
+                    <span class="action-icon">📖</span>
+                    <h4>Bläddra böcker</h4>
+                    <p>Sök och hantera boksamlingen</p>
+                </a>
+
+                <a href="/members" class="action-card">
+                    <span class="action-icon">✨</span>
+                    <h4>Hantera medlemmar</h4>
+                    <p>Se och redigera medlemsinformation</p>
+                </a>
+
+                <a href="/loans" class="action-card">
+                    <span class="action-icon">🔄</span>
+                    <h4>Lånehantering</h4>
+                    <p>Skapa nya lån och hantera returer</p>
+                </a>
+            </div>
+        </div>
+
+        @if (overdueLoansCount > 0)
+        {
+            <div class="alert alert-warning mt-4" role="alert">
+                <strong>⚠️ Observera:</strong> Det finns @overdueLoansCount försenade lån som behöver åtgärdas.
+                <a href="/loans" class="alert-link">Visa lån</a>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .home-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .hero-section {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding: 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 1rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+        .hero-section h1 {
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .hero-section .lead {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        position: relative;
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .stat-card.books {
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-card.members {
+            border-left: 4px solid #f093fb;
+        }
+
+        .stat-card.loans {
+            border-left: 4px solid #4facfe;
+        }
+
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-content h3 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #2d3748;
+    }
+
+    .stat-content p {
+        color: #718096;
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .quick-actions h2 {
+        text-align: center;
+        color: #2d3748;
+        font-weight: 600;
+    }
+
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .action-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        text-align: center;
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+            border-color: #667eea;
+        }
+
+    .action-icon {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: 1rem;
+    }
+
+    .action-card h4 {
+        color: #2d3748;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .action-card p {
+        color: #718096;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    @@media (prefers-color-scheme: dark) {
+        .stat-card, .action-card {
+            background: #2d3748;
+        }
+
+            .stat-content h3, .action-card h4 {
+                color: #e2e8f0;
+            }
+
+            .stat-content p, .action-card p {
+                color: #a0aec0;
+            }
+    }
+</style>
+
+@code {
     private bool statsLoaded = false;
-        private int booksCount;
-        private int membersCount;
-        private int activeLoansCount;
-      
+    private int booksCount;
+    private int membersCount;
+    private int activeLoansCount;
+    private int overdueLoansCount;
 
-    // När komponenten initieras, hämta statistik från databasen
-        protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
+    {
+        try
         {
             booksCount = await Db.Books.CountAsync();
             membersCount = await Db.Members.CountAsync();
             activeLoansCount = await Db.Loans.Where(l => l.ReturnDate == null).CountAsync();
+            overdueLoansCount = await Db.Loans
+                .Where(l => l.ReturnDate == null && l.DueDate < DateTime.Now)
+                .CountAsync();
+
             statsLoaded = true;
         }
-}
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading statistics: {ex.Message}");
+            statsLoaded = true; // Set to true to stop loading spinner
+        }
+    }
 }
