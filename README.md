@@ -1,169 +1,195 @@
-# Library System – Console Application (TDD)
+Part 2 – Entity Framework & Blazor
+Overview
 
-Ett **konsolbaserat bibliotekssystem** skrivet i **C# (.NET)** som hanterar böcker, medlemmar och utlåningar. Systemet erbjuder sökning, statistik och enkel menyhantering i konsolen.
+In Part 2 of the project, the library system was extended with:
 
-Projektet är utvecklat med **Test-Driven Development (TDD)** och följer objektorienterade principer som **inkapsling**, **komposition** och **polymorfism**.
+Entity Framework Core for persistent data storage
 
----
+Blazor Server for the web user interface
 
-## 📚 Features
+Repository Pattern to separate data access from business logic
 
-### Huvudfunktioner
-- ✅ **Hantera böcker** - Lägg till, sök och visa böcker
-- ✅ **Hantera medlemmar** - Registrera medlemmar med email och medlemsdatum
-- ✅ **Låna och returnera böcker** - Komplett lånehantering med förfallodatum
-- ✅ **Förseningsavgifter** - Automatisk beräkning ($5 per dag)
-- ✅ **Sök- och sorteringsfunktioner** - Case-insensitive sökning
-- ✅ **Statistik** - Totalt antal böcker, utlånade böcker, mest aktiv medlem
-- ✅ **Robust felhantering** - Validering och tydliga felmeddelanden
+Unit tests to verify functionality
 
----
-
-## 🎯 Objektorienterade Principer
-
-### Inkapsling
-- **Book** - Properties med `private set`, ISBN är `readonly`
-- **Member** - Inkapslade listor över lån, email och medlemskap
-- **Loan** - Beräknade properties (`IsOverdue`, `IsReturned`)
-
-### Komposition
-`Library` använder tre specialiserade service-klasser:
-- **BookCatalog** - Hanterar alla böcker och sökning
-- **MemberRegistry** - Hanterar alla medlemmar
-- **LoanManager** - Hanterar utlåning och returer
-
-### Interface & Polymorfism
-- **ISearchable** - Implementerat av `Book`
-- Enhetlig sökfunktionalitet genom interface
-
-### Algoritmer
-- **Sökfunktion** - LINQ `Where` med case-insensitive sökning
-- **Sortering** - LINQ `OrderBy` för alfabetisk sortering
-- **Statistik** - LINQ `GroupBy`, `Count`, `Sum` för analys
-
----
+The application allows librarians to manage books, members, and loans through a modern web interface.
 
 
-### Köra programmet
-
-1. Öppna lösningen i Visual Studio eller via terminal
-2. Kör testerna:
-
-```powershell
-dotnet test
-```
-
-3. Starta konsolapplikationen:
-
-```powershell
-dotnet run --project LibrarySystem
-```
-
----
-
-## Overview
-
-## Features
-
-### Core Domain
-
-* **Book**
-  Represents a library book with title, author, and ISBN.
-
-* **Member**
-  Represents a library member with an ID and name.
-
-* **Loan**
-  Represents a book loan with a member and loan date.
-
----
-
-### Library Functionality
-
-* Total number of books
-* Number of borrowed books
-* Most active member (member with the most loans)
-
----
-
-### Catalog & Search
-
-* Search books by title, author, or ISBN
-* Sorting books alphabetically by title
-* Polymorphism via `ISearchable` interface
-
----
-
-### Console Application
-
-A simple console program (`Program.cs`) demonstrates how the system can be used and outputs basic statistics.
-
----
-
-## Technologies Used
-
-* **C# (.NET)**
-* **xUnit** for unit testing
-* **LINQ** for filtering, grouping, and sorting
-* **Git** for version control
-
----
-
-
-## Testing & TDD Approach
-
-This project strictly follows **Test-Driven Development**:
-
-1. **RED** – Write a failing test
-2. **REFACTOR** – Improve code 
-3. **GREEN** – Write minimal code to pass the test
-   
-### Testöversikt
-
-**19 enhetstester** med xUnit som täcker alla krav och mer:
-
-| Testkategori | Antal tester | Täcker |
-|--------------|--------------|--------|
-| **Book-klassen** | 4 tester | Constructor, properties, GetInfo(), IsAvailable |
-| **Loan-klassen** | 6 tester | IsOverdue, CalculateLateFee, IsReturned, Theory-tester |
-| **Member-klassen** | 3 tester | BorrowedBooks, AddLoan, HasOverdueBooks |
-| **Sökning (ISearchable)** | 3 tester | Matches(), case-insensitive, edge cases |
-| **Statistik** | 3 tester | TotalBooks, BorrowedBooks, MostActiveMember |
-| **Totalt** | **19 tester** | **100% av kraven** |
-
-### Testtekniker som används
-- ✅ **[Fact]** - Enskilda testfall med specifika förutsättningar
-- ✅ **[Theory]** med **[InlineData]** - Parametriserade tester med flera datavärden
-- ✅ **AAA-mönstret** - Arrange, Act, Assert för tydlig teststruktur
-- ✅ **Edge cases** - Testar gränsfall som tomma listor, null-värden, försenade lån
-- ✅ **Negativa tester** - Verifierar felhantering och validering
-  
-Each feature is backed by unit tests, and the Git history clearly shows the progression from failing tests to working implementations.
-
-Run all tests with:
-
-```powershell
-dotnet test
-```
-
-
-## How to Run
-
+How to Run the Project
 1. Clone the repository
-2. Navigate to the solution folder
-3. Run the application:
+git clone https://github.com/your-username/LibrarySystem.git
+2. Navigate to the project folder
+cd LibrarySystem
+3. Restore dependencies
+dotnet restore
+4. Run the application
+dotnet run --project LibrarySystem.Web
 
-```powershell
-dotnet run
-```
----
+The application will start and open in the browser at:
 
-## Author
+https://localhost:7065
+Database Model
 
-Developed as part of a programming assignment focusing on clean code, testing, and maintainable design.
+The system uses Entity Framework Core with SQLite.
 
----
+Three main entities are used:
 
-## Notes
+Book
+Id
+ISBN
+Title
+Author
+PublishedYear
+IsAvailable
+Member
+Id
+Name
+Email
+MemberSince
+Loan
+Id
+BookId
+MemberId
+LoanDate
+DueDate
+ReturnDate
+Database Relationships
+Member 1 ----- * Loan
+Book   1 ----- * Loan
 
-This project intentionally keeps the console UI minimal to focus on **logic, structure, and testability** rather than presentation.
+Explanation:
+
+One Member can have many Loans
+
+One Book can appear in many Loans
+
+Each Loan references one Book and one Member
+
+Blazor Web Interface
+
+The Blazor Server application contains the following pages:
+
+Dashboard (/)
+
+Displays system statistics:
+
+Total books
+
+Total members
+
+Active loans
+
+Available vs borrowed books
+
+Overdue loans
+
+Books (/books)
+
+Features:
+
+View all books
+
+Search by title, author, ISBN, or year
+
+Sort by columns
+
+Add new books
+
+Edit book information
+
+Delete books
+
+View detailed book information
+
+Members (/members)
+
+Features:
+
+View all members
+
+Register new members
+
+Edit member information
+
+View member details
+
+Loans (/loans)
+
+Features:
+
+Create a new loan
+
+Return borrowed books
+
+Display active loans
+
+Highlight overdue loans
+
+Unit Testing
+
+Unit tests are implemented using xUnit.
+
+Tests verify:
+
+Book repository operations
+
+Loan creation and return logic
+
+Search functionality
+
+Business rules
+
+Overdue loan detection
+
+The test project contains more than 10 tests, fulfilling the assignment requirements.
+
+Run tests with:
+dotnet test
+
+
+Application Screenshots
+
+Dashboard
+<img width="960" height="459" alt="Dashboard" src="https://github.com/user-attachments/assets/b89fcc94-1b57-41ab-9414-c750f0299806" />
+
+Books Page
+<img width="953" height="429" alt="Boklista" src="https://github.com/user-attachments/assets/c7727ff1-f526-439e-8bdb-0700fddab9b5" />
+
+
+Members Page
+<img width="948" height="451" alt="Medlemmar" src="https://github.com/user-attachments/assets/575abca6-b4df-4c14-b210-a4bb4cd467ec" />
+
+
+Loans Page
+
+<img width="942" height="434" alt="lån" src="https://github.com/user-attachments/assets/86c60491-abbd-436a-bccc-c63c92b33e51" />
+
+
+Technologies Used
+.NET 8
+ASP.NET Core
+Blazor Server
+Entity Framework Core
+SQLite
+xUnit
+Bootstrap
+
+
+Summary
+
+This project demonstrates:
+
+Entity Framework database integration
+
+Blazor component-based UI
+
+Clean project structure
+
+Repository pattern
+
+Dependency injection
+
+Unit testing
+
+Responsive user interface
+
+The system fulfills the requirements for Entity Framework integration, Blazor UI, database persistence, and automated testing.
