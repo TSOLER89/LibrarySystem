@@ -1,0 +1,108 @@
+﻿@page "/members/{Id:int}"
+@rendermode InteractiveServer
+@using LibrarySystem.Core.Models
+@inject LibrarySystem.Web.Services.MemberService MemberService
+
+<h3>👤 Medlemsdetaljer</h3>
+
+@if (loading)
+{
+    <p>Laddar...</p>
+}
+else if (member is null)
+{
+    <div class="alert alert-warning">
+        Kunde inte hitta medlemmen.
+    </div>
+    <a class="btn btn-link" href="/members">Tillbaka</a>
+}
+else
+{
+    <div class="card p-3 mb-4">
+        <h4>@member.Name</h4>
+        <p><strong>Email:</strong> @member.Email</p>
+        <p><strong>Medlem sedan:</strong> @member.MemberSince.ToShortDateString()</p>
+        <p><strong>Aktiva lån:</strong> @ActiveLoans.Count</p>
+    </div>
+
+    <h5>Aktiva lån</h5>
+
+    @if (ActiveLoans.Count == 0)
+    {
+        <p>Inga aktiva lån.</p>
+    }
+    else
+    {
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Bok</th>
+                    <th>Lånedatum</th>
+                    <th>Förfallodatum</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var loan in ActiveLoans)
+                {
+                    <tr>
+                        <td>@loan.Book?.Title</td>
+                        <td>@loan.LoanDate.ToShortDateString()</td>
+                        <td>@loan.DueDate.ToShortDateString()</td>
+                        <td>Utlånad</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <h5 class="mt-4">Lånehistorik</h5>
+
+    @if (member.Loans is null || member.Loans.Count == 0)
+    {
+        <p>Ingen historik ännu.</p>
+    }
+    else
+    {
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>Bok</th>
+                    <th>Lånedatum</th>
+                    <th>Returnerad</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var loan in member.Loans.OrderByDescending(l => l.LoanDate))
+                {
+                    <tr>
+                        <td>@loan.Book?.Title</td>
+                        <td>@loan.LoanDate.ToShortDateString()</td>
+                        <td>
+                            @(loan.IsReturned
+                                            ? $"Ja ({loan.ReturnDate?.ToShortDateString()})"
+                                            : "Nej")
+            </td>
+        </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <a class="btn btn-outline-secondary" href="/members">Tillbaka</a>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Member? member;
+    private bool loading = true;
+
+    private List<Loan> ActiveLoans => member?.Loans.Where(l => !l.IsReturned).ToList() ?? new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        member = await MemberService.GetByIdAsync(Id);
+        loading = false;
+    }
+}

@@ -1,0 +1,120 @@
+﻿@page "/books/edit/{Id:int}"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using LibrarySystem.Core.Models
+@inject LibrarySystem.Web.Services.BookService BookService
+@inject NavigationManager Nav
+
+<h3>✏️ Redigera bok</h3>
+
+@if (loading)
+{
+    <p>Laddar...</p>
+}
+else if (notFound)
+{
+    <div class="alert alert-warning">
+        Hittade ingen bok med id = @Id
+    </div>
+    <a class="btn btn-link" href="/books">Tillbaka</a>
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="HandleValidSubmit" FormName="EditBookForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="isbn">ISBN</label>
+            <InputText id="isbn" class="form-control" @bind-Value="model.ISBN" />
+            <ValidationMessage For="@(() => model.ISBN)" />
+            <small class="text-muted">10 eller 13 siffror (t.ex. 9780451524935)</small>
+        </div>
+
+        <div class="mb-3">
+            <label for="title">Titel</label>
+            <InputText id="title" class="form-control" @bind-Value="model.Title" />
+            <ValidationMessage For="@(() => model.Title)" />
+        </div>
+
+        <div class="mb-3">
+            <label for="author">Författare</label>
+            <InputText id="author" class="form-control" @bind-Value="model.Author" />
+            <ValidationMessage For="@(() => model.Author)" />
+        </div>
+
+        <div class="mb-3">
+            <label for="year">Publiceringsår</label>
+            <InputNumber id="year" class="form-control" @bind-Value="model.PublishedYear" />
+            <ValidationMessage For="@(() => model.PublishedYear)" />
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" type="submit">Spara</button>
+            <a class="btn btn-outline-secondary" href="/books">Avbryt</a>
+        </div>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private bool loading = true;
+    private bool notFound = false;
+
+    private Book? entity;
+    private EditBookModel model = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        entity = await BookService.GetByIdAsync(Id);
+
+        if (entity is null)
+        {
+            notFound = true;
+            loading = false;
+            return;
+        }
+
+        model = new EditBookModel
+        {
+            ISBN = entity.ISBN,
+            Title = entity.Title,
+            Author = entity.Author,
+            PublishedYear = entity.PublishedYear
+        };
+
+        loading = false;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (entity is null) return;
+
+        entity.ISBN = model.ISBN.Trim();
+        entity.Title = model.Title.Trim();
+        entity.Author = model.Author.Trim();
+        entity.PublishedYear = model.PublishedYear;
+
+        await BookService.UpdateAsync(entity);
+
+        Nav.NavigateTo("/books", forceLoad: true);
+    }
+
+    private class EditBookModel
+    {
+        [Required(ErrorMessage = "ISBN måste fyllas 10/13 siffror")]
+        [RegularExpression(@"^(?:\d{10}|\d{13})$", ErrorMessage = "ISBN måste vara 10 eller 13 siffror")]
+        public string ISBN { get; set; } = "";
+
+        [Required(ErrorMessage = "Titel måste fyllas i")]
+        public string Title { get; set; } = "";
+
+        [Required(ErrorMessage = "Författare måste fyllas i")]
+        public string Author { get; set; } = "";
+
+        [Range(1450, 2100, ErrorMessage = "År måste vara mellan 1450 och 2100")]
+        public int PublishedYear { get; set; }
+    }
+}

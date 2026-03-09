@@ -48,9 +48,11 @@ namespace LibrarySystem.Core.Services
                 return new List<Member>();
 
             searchTerm = searchTerm.ToLower();
-            return _members.Where(m =>
-                m.Name.ToLower().Contains(searchTerm) ||
-                m.Email.ToLower().Contains(searchTerm))
+
+            return _members
+                .Where(m =>
+                    m.Name.ToLower().Contains(searchTerm) ||
+                    m.Email.ToLower().Contains(searchTerm))
                 .ToList();
         }
 
@@ -63,7 +65,8 @@ namespace LibrarySystem.Core.Services
         // Få medlemmar med försenade böcker
         public List<Member> GetMembersWithOverdueBooks()
         {
-            return _members.Where(m => m.HasOverdueBooks()).ToList();
+            // ✅ FIX: HasOverdueBooks kräver DateTime today
+            return _members.Where(m => m.HasOverdueBooks(DateTime.Today)).ToList();
         }
     }
 }

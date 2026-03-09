@@ -1,0 +1,89 @@
+﻿@page "/books/add"
+@using LibrarySystem.Core.Models
+@inject NavigationManager Navigation
+
+<h3>+ Lägg till ny bok</h3>
+
+<EditForm Model="@book" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label class="form-label">ISBN</label>
+        <InputText @bind-Value="book.ISBN"
+                   class="form-control"
+                   placeholder="9781234567890" />
+        <ValidationMessage For="@(() => book.ISBN)" class="text-danger" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Titel</label>
+        <InputText @bind-Value="book.Title"
+                   class="form-control"
+                   placeholder="Bokens titel" />
+        <ValidationMessage For="@(() => book.Title)" class="text-danger" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Författare</label>
+        <InputText @bind-Value="book.Author"
+                   class="form-control"
+                   placeholder="Författarens namn" />
+        <ValidationMessage For="@(() => book.Author)" class="text-danger" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Publiceringsår</label>
+        <InputNumber @bind-Value="book.PublishedYear"
+                     class="form-control"
+                     placeholder="2024" />
+        <ValidationMessage For="@(() => book.PublishedYear)" class="text-danger" />
+    </div>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
+
+    <button type="submit" class="btn btn-primary">Spara</button>
+    <a href="/books" class="btn btn-secondary">Avbryt</a>
+</EditForm>
+
+@code {
+    private Book book = new Book { PublishedYear = 2026 };
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            // Här sparar du boken till databasen
+            // await BookService.AddBookAsync(book);
+
+            successMessage = $"Boken '{book.Title}' har lagts till!";
+            errorMessage = string.Empty;
+
+            // Vänta lite så användaren ser meddelandet
+            await Task.Delay(1500);
+
+            // Navigera tillbaka till boklistan
+            Navigation.NavigateTo("/books");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ett fel uppstod: {ex.Message}";
+            successMessage = string.Empty;
+        }
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        errorMessage = "Vänligen rätta till felen i formuläret.";
+        successMessage = string.Empty;
+    }
+}

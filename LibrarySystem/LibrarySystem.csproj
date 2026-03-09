@@ -5,6 +5,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+	  <NoWarn>CS8604,CS8629</NoWarn>
+	  <!-- Ignorera nullable-varningar -->
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,0 +1,57 @@
+﻿@page "/members/new"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using LibrarySystem.Core.Models
+@inject LibrarySystem.Web.Services.MemberService MemberService
+@inject NavigationManager Nav
+
+<h3>➕ Lägg till ny medlem</h3>
+
+<EditForm Model="model" OnValidSubmit="HandleValidSubmit" FormName="NewMemberForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="name">Namn</label>
+        <InputText id="name" class="form-control" @bind-Value="model.Name" />
+        <ValidationMessage For="@(() => model.Name)" />
+    </div>
+
+    <div class="mb-3">
+        <label for="email">Email</label>
+        <InputText id="email" class="form-control" @bind-Value="model.Email" />
+        <ValidationMessage For="@(() => model.Email)" />
+    </div>
+
+    <button class="btn btn-primary" type="submit">Spara</button>
+    <a class="btn btn-link" href="/members">Avbryt</a>
+</EditForm>
+
+@code {
+    private NewMemberModel model = new();
+
+    private async Task HandleValidSubmit()
+    {
+        var member = new Member
+        {
+            Name = model.Name.Trim(),
+            Email = model.Email.Trim(),
+            MemberSince = DateTime.Now
+        };
+
+        await MemberService.AddAsync(member);
+        Nav.NavigateTo("/members", forceLoad: true);
+    }
+
+    private class NewMemberModel
+    {
+        [Required(ErrorMessage = "Namn måste fyllas i")]
+        [MinLength(2, ErrorMessage = "Namn måste vara minst 2 tecken")]
+        public string Name { get; set; } = "";
+
+        [Required(ErrorMessage = "Email måste fyllas i")]
+        [EmailAddress(ErrorMessage = "Email måste vara i rätt format")]
+        public string Email { get; set; } = "";
+    }
+}
